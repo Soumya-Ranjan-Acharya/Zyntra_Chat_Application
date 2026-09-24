@@ -23,7 +23,7 @@ const SettingsLayout = ({ children }) => {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f1f3f6',
+        backgroundColor: 'var(--color-bg-secondary)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -37,9 +37,10 @@ const SettingsLayout = ({ children }) => {
         style={{
           width: '100%',
           maxWidth: '1060px',
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--color-bg-primary)',
           borderRadius: '24px',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.06)',
+          boxShadow: 'var(--elevation-3)',
+          border: '1px solid var(--color-border-primary)',
           padding: '28px 36px 36px 36px',
           boxSizing: 'border-box',
           margin: '0 auto'
@@ -63,14 +64,14 @@ const SettingsLayout = ({ children }) => {
               style={{
                 fontSize: '19px',
                 fontWeight: 800,
-                color: '#0f172a',
+                color: 'var(--color-text-primary)',
                 letterSpacing: '-0.025em',
                 cursor: 'pointer'
               }}
             >
               Zyntra
             </span>
-            <span style={{ fontSize: '13px', color: '#94a3b8', fontWeight: 500 }}>
+            <span style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', fontWeight: 500 }}>
               Settings
             </span>
 
@@ -87,16 +88,16 @@ const SettingsLayout = ({ children }) => {
                   border: 'none',
                   fontSize: '13px',
                   fontWeight: 700,
-                  color: '#0f172a',
+                  color: 'var(--color-text-primary)',
                   cursor: 'pointer',
                   padding: '4px 8px',
                   borderRadius: '6px',
-                  backgroundColor: dropdownOpen ? '#f1f5f9' : 'transparent',
+                  backgroundColor: dropdownOpen ? 'var(--color-bg-hover)' : 'transparent',
                   transition: 'background-color 0.15s'
                 }}
               >
                 <span>{currentTab.label}</span>
-                <span style={{ fontSize: '10px', color: '#64748b' }}>▾</span>
+                <span style={{ fontSize: '10px', color: 'var(--color-text-tertiary)' }}>▾</span>
               </button>
 
               {/* Section dropdown menu */}
@@ -107,10 +108,10 @@ const SettingsLayout = ({ children }) => {
                     top: '100%',
                     left: 0,
                     marginTop: '6px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
+                    backgroundColor: 'var(--color-bg-primary)',
+                    border: '1px solid var(--color-border-primary)',
                     borderRadius: '12px',
-                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                    boxShadow: 'var(--elevation-2)',
                     minWidth: '220px',
                     zIndex: 50,
                     padding: '6px'
@@ -127,8 +128,8 @@ const SettingsLayout = ({ children }) => {
                         padding: '8px 12px',
                         fontSize: '12px',
                         fontWeight: tab.to === location.pathname ? 700 : 500,
-                        color: tab.to === location.pathname ? '#1d63ff' : '#334155',
-                        backgroundColor: tab.to === location.pathname ? '#eff6ff' : 'transparent',
+                        color: tab.to === location.pathname ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                        backgroundColor: tab.to === location.pathname ? 'rgba(var(--color-accent-rgb), 0.1)' : 'transparent',
                         borderRadius: '6px',
                         cursor: 'pointer',
                         transition: 'background-color 0.1s'
@@ -150,7 +151,7 @@ const SettingsLayout = ({ children }) => {
               width: '32px',
               height: '32px',
               borderRadius: '50%',
-              backgroundColor: '#1d63ff',
+              backgroundColor: 'var(--color-accent)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -160,7 +161,7 @@ const SettingsLayout = ({ children }) => {
               cursor: 'pointer',
               userSelect: 'none',
               overflow: 'hidden',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+              boxShadow: 'var(--elevation-1)'
             }}
           >
             {user?.avatar ? (
@@ -178,10 +179,10 @@ const SettingsLayout = ({ children }) => {
         {/* The Crisp Blue Bordered Container matching media_1789559080552.png */}
         <div
           style={{
-            border: '2px solid #1d63ff',
+            border: '2px solid var(--color-accent)',
             borderRadius: '14px',
             padding: '28px 32px',
-            backgroundColor: '#ffffff'
+            backgroundColor: 'var(--color-bg-primary)'
           }}
         >
           {children}

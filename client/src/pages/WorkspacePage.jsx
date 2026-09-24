@@ -122,25 +122,38 @@ const WorkspacePage = () => {
     <AppLayout sidebar={<Sidebar mode="workspace" />}>
       {allWorkspaces.length === 0 ? (
         /* Fresh User Onboarding Empty State for Workspaces */
-        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[#f8fafc] text-center select-none h-full">
+        <div 
+          className="flex-1 flex flex-col items-center justify-center p-8 text-center select-none h-full"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        >
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex items-center justify-center text-white mb-5">
             <Building2 size={30} />
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold mb-3 border border-blue-200/60">
+          <div 
+            style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-accent)', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3"
+          >
             <Sparkles size={12} />
             Contextual Workplaces
           </div>
-          <h2 className="text-xl font-extrabold text-slate-900 mb-2 tracking-tight">
+          <h2 
+            style={{ color: 'var(--color-text-primary)' }}
+            className="text-xl font-extrabold mb-2 tracking-tight"
+          >
             Welcome to Zyntra Workspaces
           </h2>
-          <p className="text-xs text-slate-500 max-w-md leading-relaxed mb-6">
+          <p 
+            style={{ color: 'var(--color-text-secondary)' }}
+            className="text-xs max-w-md leading-relaxed mb-6"
+          >
             You haven't joined or created any organizations yet. Workspaces enable companies, universities, and teams to collaborate within structured channels while preserving strict privacy and policy controls.
           </p>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setCreateWsOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/25 transition-all cursor-pointer"
+              style={{ backgroundColor: 'var(--color-accent)', color: '#fff', boxShadow: '0 4px 14px rgba(var(--color-accent-rgb), 0.3)' }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl hover:opacity-90 text-xs font-bold transition-all cursor-pointer"
             >
               <Plus size={15} />
               + Create Workplace
@@ -148,13 +161,17 @@ const WorkspacePage = () => {
             <button
               type="button"
               onClick={() => setJoinWsOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold shadow-xs transition-all cursor-pointer"
+              style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border-primary)' }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl hover:opacity-80 text-xs font-bold shadow-xs transition-all cursor-pointer"
             >
               <KeyRound size={15} />
               # Join with Code
             </button>
           </div>
-          <div className="mt-8 inline-flex items-center gap-2 text-[11px] text-slate-400">
+          <div 
+            style={{ color: 'var(--color-text-tertiary)' }}
+            className="mt-8 inline-flex items-center gap-2 text-[11px]"
+          >
             <Shield size={14} className="text-blue-500" />
             Independent Contextual Identities & Role Governance
           </div>

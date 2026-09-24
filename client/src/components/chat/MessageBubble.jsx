@@ -83,6 +83,11 @@ const MessageBubble = ({
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setShowReactionPicker(false); }}
+      onClick={(e) => {
+        // Prevent toggle if clicking within the action menu itself or input
+        if (e.target.closest('button') || e.target.closest('input')) return;
+        if ('ontouchstart' in window) setHovered(!hovered);
+      }}
     >
       {/* Avatar — only for first in group */}
       {!isOwn && (

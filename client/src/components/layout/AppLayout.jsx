@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, LogOut, Menu, X, Home } from 'lucide-react';
 import Avatar from '../ui/Avatar';
@@ -9,6 +9,12 @@ const AppLayout = ({ children, sidebar }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout, activeContext } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Close sidebar on route change for mobile
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -42,6 +48,9 @@ const AppLayout = ({ children, sidebar }) => {
 
       {/* Left Sidebar */}
       <aside
+        className={`fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
         style={{
           width: '320px',
           minWidth: '320px',
@@ -52,8 +61,7 @@ const AppLayout = ({ children, sidebar }) => {
           backgroundColor: 'var(--sidebar-bg)',
           color: 'var(--sidebar-text)',
           borderRight: '1px solid var(--sidebar-border)',
-          zIndex: 30,
-          position: 'relative',
+          zIndex: 50, // above the mobile backdrop
         }}
       >
         {/* Sidebar content */}

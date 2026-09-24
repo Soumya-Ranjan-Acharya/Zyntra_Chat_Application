@@ -61,7 +61,8 @@ const PillSelector = ({ options, value, onChange }) => (
     style={{
       display: 'inline-flex',
       alignItems: 'center',
-      backgroundColor: '#f1f4f9',
+      backgroundColor: 'var(--color-bg-secondary)',
+      border: '1px solid var(--color-border-primary)',
       borderRadius: '8px',
       padding: '3px',
       gap: '2px',
@@ -89,7 +90,7 @@ const PillSelector = ({ options, value, onChange }) => (
             cursor: 'pointer',
             transition: 'all 0.15s ease',
             backgroundColor: isActive ? 'var(--color-accent, #1d63ff)' : 'transparent',
-            color: isActive ? '#ffffff' : '#475569'
+            color: isActive ? '#ffffff' : 'var(--color-text-secondary)'
           }}
         >
           {Icon && <Icon size={12} />}
@@ -107,7 +108,7 @@ const SettingBlock = ({ title, description, children, badge = null }) => (
         style={{
           fontSize: '13.5px',
           fontWeight: 700,
-          color: '#0f172a',
+          color: 'var(--color-text-primary)',
           letterSpacing: '-0.01em',
           margin: 0
         }}
@@ -121,9 +122,9 @@ const SettingBlock = ({ title, description, children, badge = null }) => (
             fontWeight: 700,
             padding: '2px 7px',
             borderRadius: '999px',
-            backgroundColor: '#eff6ff',
-            color: '#1d63ff',
-            border: '1px solid #bfdbfe'
+            backgroundColor: 'rgba(var(--color-accent-rgb), 0.15)',
+            color: 'var(--color-accent)',
+            border: '1px solid rgba(var(--color-accent-rgb), 0.2)'
           }}
         >
           {badge}
@@ -134,7 +135,7 @@ const SettingBlock = ({ title, description, children, badge = null }) => (
       <p
         style={{
           fontSize: '11.5px',
-          color: '#64748b',
+          color: 'var(--color-text-tertiary)',
           margin: '0 0 10px 0',
           lineHeight: 1.45
         }}

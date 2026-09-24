@@ -17,11 +17,11 @@ const ChatHeader = ({
 
   return (
     <header
+      className="pl-[48px] lg:pl-5 pr-5 py-2.5"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '10px 20px',
         borderBottom: '1px solid var(--color-border-primary)',
         backgroundColor: 'var(--color-bg-primary)',
         backdropFilter: 'blur(16px)',

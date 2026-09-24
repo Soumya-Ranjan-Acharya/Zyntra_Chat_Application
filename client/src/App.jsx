@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import useAuthStore from './store/useAuthStore';
 import useThemeStore from './store/useThemeStore';
 
@@ -25,9 +26,22 @@ function GuestRoute({ children }) {
   return children;
 }
 
+const PageWrapper = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+    style={{ height: '100%', width: '100%' }}
+  >
+    {children}
+  </motion.div>
+);
+
 export default function App() {
   const applyTheme = useThemeStore((s) => s.applyTheme);
   const checkAuth = useAuthStore((s) => s.checkAuth);
+  const location = useLocation();
 
   /* Apply saved theme and verify auth on mount */
   useEffect(() => {
@@ -36,107 +50,109 @@ export default function App() {
   }, [applyTheme, checkAuth]);
 
   return (
-    <Routes>
-      {/* ---- Auth Routes (guest-only) ---- */}
-      <Route
-        path="/login"
-        element={
-          <GuestRoute>
-            <LoginPage />
-          </GuestRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <GuestRoute>
-            <RegisterPage />
-          </GuestRoute>
-        }
-      />
-      <Route
-        path="/forgot-password"
-        element={
-          <GuestRoute>
-            <ForgotPasswordPage />
-          </GuestRoute>
-        }
-      />
+    <AnimatePresence mode="wait">
+      <Routes>
+        {/* ---- Auth Routes (guest-only) ---- */}
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <PageWrapper><LoginPage /></PageWrapper>
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <GuestRoute>
+              <PageWrapper><RegisterPage /></PageWrapper>
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <GuestRoute>
+              <PageWrapper><ForgotPasswordPage /></PageWrapper>
+            </GuestRoute>
+          }
+        />
 
-      {/* ---- Protected Routes ---- */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-        }
-      />
+        {/* ---- Protected Routes ---- */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><HomePage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Personal Chat */}
-      <Route
-        path="/personal"
-        element={
-          <ProtectedRoute>
-            <PersonalChatPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/personal/:chatId"
-        element={
-          <ProtectedRoute>
-            <PersonalChatPage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Personal Chat */}
+        <Route
+          path="/personal"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><PersonalChatPage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/personal/:chatId"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><PersonalChatPage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Workspace */}
-      <Route
-        path="/workspace"
-        element={
-          <ProtectedRoute>
-            <WorkspacePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/workspace/:wsId"
-        element={
-          <ProtectedRoute>
-            <WorkspacePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/workspace/:wsId/*"
-        element={
-          <ProtectedRoute>
-            <WorkspacePage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Workspace */}
+        <Route
+          path="/workspace"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><WorkspacePage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workspace/:wsId"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><WorkspacePage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workspace/:wsId/*"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><WorkspacePage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Settings */}
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings/:section"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Settings */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><SettingsPage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/:section"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><SettingsPage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* 404 */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        {/* 404 */}
+        <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
+      </Routes>
+    </AnimatePresence>
   );
 }

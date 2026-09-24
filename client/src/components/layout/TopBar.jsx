@@ -9,13 +9,13 @@ const TopBar = ({ breadcrumbPath, onNavigateBreadcrumb, title }) => {
 
   return (
     <div
+      className="pl-[48px] lg:pl-6 pr-6 py-2.5"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '10px 24px',
-        borderBottom: '1px solid #f1f5f9',
-        backgroundColor: '#fafbfc',
+        borderBottom: '1px solid var(--color-border-primary)',
+        backgroundColor: 'var(--color-bg-primary)',
         boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         flexShrink: 0,
         userSelect: 'none',
@@ -30,7 +30,10 @@ const TopBar = ({ breadcrumbPath, onNavigateBreadcrumb, title }) => {
           />
         ) : (
           title && (
-            <h1 className="text-sm font-bold text-slate-900 truncate tracking-tight">
+            <h1 
+              style={{ color: 'var(--color-text-primary)' }}
+              className="text-sm font-bold truncate tracking-tight"
+            >
               {title}
             </h1>
           )
@@ -40,20 +43,28 @@ const TopBar = ({ breadcrumbPath, onNavigateBreadcrumb, title }) => {
       <div className="flex items-center gap-1.5 shrink-0">
         <button
           onClick={() => alert('Search across workspace active')}
-          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+          style={{ color: 'var(--color-text-secondary)' }}
+          className="p-1.5 rounded-lg hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
           title="Search"
         >
           <Search size={16} />
         </button>
         <button
           onClick={() => alert('Notifications (2 new notifications)')}
-          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer relative"
+          style={{ color: 'var(--color-text-secondary)' }}
+          className="p-1.5 rounded-lg hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer relative"
           title="Notifications"
         >
           <Bell size={16} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white" />
+          <span 
+            style={{ backgroundColor: 'var(--color-accent)', ringColor: 'var(--color-bg-primary)' }}
+            className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full ring-2" 
+          />
         </button>
-        <div className="pl-1 border-l border-slate-200 ml-1">
+        <div 
+          style={{ borderColor: 'var(--color-border-primary)' }}
+          className="pl-1 border-l ml-1"
+        >
           <Avatar name={user?.name || 'Soumya'} src={user?.avatar} size="sm" />
         </div>
       </div>
