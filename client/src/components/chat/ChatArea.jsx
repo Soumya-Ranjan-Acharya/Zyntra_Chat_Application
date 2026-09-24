@@ -28,19 +28,42 @@ const ChatArea = ({
 
   if (!chatId) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[#f8fafc] text-center select-none h-full">
-        <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-blue-600 mb-4">
+      <div
+        className="flex-1 flex flex-col items-center justify-center p-8 text-center select-none h-full"
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      >
+        <div
+          style={{
+            width: '64px', height: '64px', borderRadius: '20px',
+            background: 'linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.12), rgba(var(--color-accent-rgb), 0.04))',
+            border: '1px solid rgba(var(--color-accent-rgb), 0.15)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--color-accent)', marginBottom: '16px',
+          }}
+        >
           <MessageSquareDashed size={28} />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
-          Select a conversation
+        <h3
+          style={{ fontSize: '17px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '-0.02em' }}
+        >
+          No conversation selected
         </h3>
-        <p className="text-xs text-slate-500 max-w-sm leading-relaxed mb-6">
-          Choose a team, direct message, or group from the sidebar to inspect messages and collaborate within your authorized workspace level.
+        <p
+          style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', maxWidth: '300px', lineHeight: 1.6, marginBottom: '20px' }}
+        >
+          Pick a contact or channel from the sidebar to start messaging.
         </p>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs border border-slate-200">
-          <Lock size={12} className="text-emerald-600" />
-          End-to-End Encrypted Communications
+        <div
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+            padding: '6px 14px', borderRadius: '999px',
+            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+            fontSize: '12px', fontWeight: 500, color: '#10b981',
+          }}
+        >
+          <Lock size={12} />
+          End-to-End Encrypted
         </div>
       </div>
     );
