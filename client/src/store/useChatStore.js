@@ -2,48 +2,35 @@ import { create } from 'zustand';
 import { mockMessagesByChat, personalContacts, personalGroups } from '../data/mockData';
 import { api } from '../services/api';
 import useAuthStore from './useAuthStore';
-import { messageService } from '../services/messageService';
-import { socketService } from '../services/socketService';
-import { encryptionService } from '../services/encryptionService';
+import {
+  joinChatRoom,
+  leaveChatRoom,
+  emitSocketMessage,
+  emitReaction,
+  getSocket,
+} from '../services/socket';
 
 // Initialize socket listeners once
 let socketInitialized = false;
 const initChatSocketListeners = (set, get) => {
   if (socketInitialized) return;
+  const socket = getSocket();
+  if (!socket) return;
   socketInitialized = true;
 
-  // Ensure socket connection
-  socketService.initSocket();
-
-  // 1. Receive incoming encrypted message from peers
-  socketService.onReceiveMessage(async (incomingMsg) => {
+  socket.on('receive_message', (incomingMsg) => {
     if (!incomingMsg?.chatId) return;
     const chatId = incomingMsg.chatId;
-
-    const currentUser = useAuthStore.getState().user;
-    const participantInfo = {
-      currentUsername: currentUser?.primaryUsername,
-      currentUserId: currentUser?.id || currentUser?._id,
-      peerUsername: incomingMsg.senderUsername,
-    };
-
-    // Decrypt incoming ciphertext message via MessageService
-    const decryptedMsg = await messageService.decryptIncomingMessage(
-      incomingMsg,
-      participantInfo
-    );
-
     const currentList = get().messages[chatId] || [];
 
-    // Prevent duplicate messages and double writes (Rule 4)
+    // Avoid duplicate if already added optimistically or exists with same content
     if (
       currentList.some(
         (m) =>
-          m.id === decryptedMsg.id ||
-          (decryptedMsg.clientTempId && m.clientTempId === decryptedMsg.clientTempId) ||
-          (m.senderId === decryptedMsg.senderId &&
-            m.content === decryptedMsg.content &&
-            Math.abs(new Date(m.timestamp) - new Date(decryptedMsg.timestamp)) < 3000)
+          m.id === incomingMsg.id ||
+          (m.senderId === incomingMsg.senderId &&
+            m.content === incomingMsg.content &&
+            Math.abs(new Date(m.timestamp) - new Date(incomingMsg.timestamp)) < 5000)
       )
     ) {
       return;
@@ -54,16 +41,16 @@ const initChatSocketListeners = (set, get) => {
         if (
           c.id === chatId ||
           (c.username &&
-            decryptedMsg.senderUsername &&
+            incomingMsg.senderUsername &&
             c.username.replace(/^@/, '').toLowerCase() ===
-              decryptedMsg.senderUsername.replace(/^@/, '').toLowerCase())
+              incomingMsg.senderUsername.replace(/^@/, '').toLowerCase())
         ) {
           return {
             ...c,
             id: chatId,
-            avatar: decryptedMsg.senderAvatar || c.avatar,
-            lastMessage: decryptedMsg.content || 'Photo',
-            lastMessageTime: decryptedMsg.timestamp || new Date().toISOString(),
+            avatar: incomingMsg.senderAvatar || c.avatar,
+            lastMessage: incomingMsg.content,
+            lastMessageTime: incomingMsg.timestamp || new Date().toISOString(),
           };
         }
         return c;
@@ -73,20 +60,20 @@ const initChatSocketListeners = (set, get) => {
         (c) =>
           c.id === chatId ||
           (c.username &&
-            decryptedMsg.senderUsername &&
+            incomingMsg.senderUsername &&
             c.username.replace(/^@/, '').toLowerCase() ===
-              decryptedMsg.senderUsername.replace(/^@/, '').toLowerCase())
+              incomingMsg.senderUsername.replace(/^@/, '').toLowerCase())
       );
 
-      if (!hasContact && decryptedMsg.senderUsername) {
+      if (!hasContact && incomingMsg.senderUsername) {
         const newContact = {
           id: chatId,
-          name: decryptedMsg.senderName || decryptedMsg.senderUsername,
-          username: decryptedMsg.senderUsername,
-          avatar: decryptedMsg.senderAvatar || null,
+          name: incomingMsg.senderName || incomingMsg.senderUsername,
+          username: incomingMsg.senderUsername,
+          avatar: incomingMsg.senderAvatar || null,
           status: 'online',
-          lastMessage: decryptedMsg.content || 'Photo',
-          lastMessageTime: decryptedMsg.timestamp || new Date().toISOString(),
+          lastMessage: incomingMsg.content,
+          lastMessageTime: incomingMsg.timestamp || new Date().toISOString(),
         };
         updatedContacts = [newContact, ...updatedContacts];
       }
@@ -94,48 +81,14 @@ const initChatSocketListeners = (set, get) => {
       return {
         messages: {
           ...state.messages,
-          [chatId]: [...(state.messages[chatId] || []), decryptedMsg],
+          [chatId]: [...(state.messages[chatId] || []), incomingMsg],
         },
         contacts: updatedContacts,
       };
     });
   });
 
-  // 2. Incoming message edit
-  socketService.onMessageEdited(async (editedMsg) => {
-    if (!editedMsg?.chatId) return;
-    const chatId = editedMsg.chatId;
-
-    const currentUser = useAuthStore.getState().user;
-    const decrypted = await messageService.decryptIncomingMessage(editedMsg, {
-      currentUsername: currentUser?.primaryUsername,
-      currentUserId: currentUser?.id || currentUser?._id,
-      peerUsername: editedMsg.senderUsername,
-    });
-
-    set((state) => ({
-      messages: {
-        ...state.messages,
-        [chatId]: (state.messages[chatId] || []).map((m) =>
-          m.id === decrypted.id ? { ...m, ...decrypted, isEdited: true } : m
-        ),
-      },
-    }));
-  });
-
-  // 3. Incoming message deletion
-  socketService.onMessageDeleted(({ messageId, chatId }) => {
-    if (!chatId) return;
-    set((state) => ({
-      messages: {
-        ...state.messages,
-        [chatId]: (state.messages[chatId] || []).filter((m) => m.id !== messageId),
-      },
-    }));
-  });
-
-  // 4. Reactions update
-  socketService.onUpdateReaction((updatedMsg) => {
+  socket.on('update_reaction', (updatedMsg) => {
     if (!updatedMsg?.chatId) return;
     const chatId = updatedMsg.chatId;
     set((state) => ({
@@ -148,8 +101,7 @@ const initChatSocketListeners = (set, get) => {
     }));
   });
 
-  // 5. Typing indicator
-  socketService.onUserTyping(({ userId, userName, isTyping }) => {
+  socket.on('user_typing', ({ userId, userName, isTyping }) => {
     set((state) => ({
       typingUsers: {
         ...state.typingUsers,
@@ -158,8 +110,7 @@ const initChatSocketListeners = (set, get) => {
     }));
   });
 
-  // 6. Avatar updates
-  socketService.onAvatarUpdated(({ username, avatar }) => {
+  socket.on('user_avatar_updated', ({ username, avatar }) => {
     if (!username) return;
     const cleanUser = username.replace(/^@/, '').toLowerCase();
     set((state) => {
@@ -215,7 +166,7 @@ const getInitialUserState = () => {
 const initialChatData = getInitialUserState();
 
 const useChatStore = create((set, get) => {
-  // Wire socket listeners once client loads
+  // Ensure socket listeners are wired
   if (typeof window !== 'undefined') {
     setTimeout(() => initChatSocketListeners(set, get), 100);
   }
@@ -229,9 +180,6 @@ const useChatStore = create((set, get) => {
     isLoadingContacts: false,
 
     initForUser: (user) => {
-      // Leave all old socket rooms on user switch (Rule 17)
-      messageService.leaveAllRooms();
-
       if (!user) {
         set({
           activeChat: null,
@@ -241,15 +189,6 @@ const useChatStore = create((set, get) => {
         });
         return;
       }
-
-      // Initialize crypto device identity keys for current user
-      encryptionService.initialize(user).catch((e) => {
-        console.warn('[E2EE] Init user keys warning:', e);
-      });
-
-      // Update socket auth token
-      const token = localStorage.getItem('zyntra_auth_token');
-      socketService.updateAuthToken(token);
 
       const isDemo = user.primaryUsername === 'soumya' || user.email === 'soumya@zyntra.com';
       if (isDemo) {
@@ -261,7 +200,7 @@ const useChatStore = create((set, get) => {
         });
         get().loadContactsAndGroups();
       } else {
-        // Fresh state for registered accounts
+        // Fresh state for newly registered accounts
         set({
           contacts: [],
           groups: [],
@@ -281,15 +220,14 @@ const useChatStore = create((set, get) => {
           const fetchedGroups = res.data.groups || [];
 
           fetchedContacts.forEach((c) => {
-            if (c.id) messageService.joinRoom(c.id);
+            if (c.id) joinChatRoom(c.id);
           });
           fetchedGroups.forEach((g) => {
-            if (g.id) messageService.joinRoom(g.id);
+            if (g.id) joinChatRoom(g.id);
           });
 
           const currentUser = useAuthStore.getState().user;
-          const isDemo =
-            currentUser?.primaryUsername === 'soumya' || currentUser?.email === 'soumya@zyntra.com';
+          const isDemo = currentUser?.primaryUsername === 'soumya' || currentUser?.email === 'soumya@zyntra.com';
 
           if (isDemo) {
             set((state) => {
@@ -336,7 +274,7 @@ const useChatStore = create((set, get) => {
     addContact: (contact) => {
       if (!contact) return;
       if (contact.id) {
-        messageService.joinRoom(contact.id);
+        joinChatRoom(contact.id);
       }
       set((state) => {
         const cleanTarget = contact.username?.replace(/^@/, '').toLowerCase();
@@ -351,7 +289,7 @@ const useChatStore = create((set, get) => {
           updated[existingIndex] = {
             ...updated[existingIndex],
             ...contact,
-            id: contact.id || updated[existingIndex].id,
+            id: contact.id || updated[existingIndex].id
           };
           return {
             contacts: updated,
@@ -367,9 +305,6 @@ const useChatStore = create((set, get) => {
 
     addGroup: (group) => {
       if (!group) return;
-      if (group.id) {
-        messageService.joinRoom(group.id);
-      }
       set((state) => {
         const exists = state.groups.some((g) => g.id === group.id);
         if (exists) return { activeChat: group.id };
@@ -380,122 +315,87 @@ const useChatStore = create((set, get) => {
       });
     },
 
-    // Set active chat: leaves old room, joins new room, fetches decrypted history
     setActiveChat: (chatId) => {
       const prevChat = get().activeChat;
-      // Context switching must not leak old socket rooms (Rule 17)
       if (prevChat && prevChat !== chatId) {
-        messageService.leaveRoom(prevChat);
+        leaveChatRoom(prevChat);
       }
 
       set({ activeChat: chatId });
 
       if (chatId) {
-        messageService.joinRoom(chatId);
+        joinChatRoom(chatId);
 
-        const currentUser = useAuthStore.getState().user;
-        const contact = get().contacts.find((c) => c.id === chatId);
-        const participantInfo = {
-          currentUsername: currentUser?.primaryUsername,
-          currentUserId: currentUser?.id || currentUser?._id,
-          peerUsername: contact?.username,
-        };
-
-        // Fetch history via REST GET and decrypt locally (History flow)
-        messageService
-          .fetchHistory(chatId, participantInfo)
-          .then((decryptedHistory) => {
-            if (Array.isArray(decryptedHistory) && decryptedHistory.length > 0) {
-              set((state) => {
-                const existing = state.messages[chatId] || [];
-                const merged = [...existing];
-
-                decryptedHistory.forEach((backendMsg) => {
-                  const existingIdx = merged.findIndex(
-                    (m) =>
-                      m.id === backendMsg.id ||
-                      (backendMsg.clientTempId && m.clientTempId === backendMsg.clientTempId)
-                  );
-                  if (existingIdx !== -1) {
-                    merged[existingIdx] = {
-                      ...merged[existingIdx],
-                      ...backendMsg,
-                      status: 'sent',
-                      isOptimistic: false,
-                    };
-                  } else {
-                    merged.push(backendMsg);
-                  }
-                });
-
-                merged.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                return {
-                  messages: {
-                    ...state.messages,
-                    [chatId]: merged,
-                  },
-                };
+        // Fetch latest messages from MongoDB Atlas backend in background
+        api.messages.getByChat(chatId).then((res) => {
+          if (res.ok && Array.isArray(res.data?.data) && res.data.data.length > 0) {
+            set((state) => {
+              const existing = state.messages[chatId] || [];
+              const merged = [...existing];
+              res.data.data.forEach((backendMsg) => {
+                const existingIdx = merged.findIndex(
+                  (m) =>
+                    m.id === backendMsg.id ||
+                    (m.senderId === backendMsg.senderId &&
+                      m.content === backendMsg.content &&
+                      Math.abs(new Date(m.timestamp) - new Date(backendMsg.timestamp)) < 5000)
+                );
+                if (existingIdx !== -1) {
+                  merged[existingIdx] = {
+                    ...merged[existingIdx],
+                    ...backendMsg,
+                    senderAvatar: backendMsg.senderAvatar || merged[existingIdx].senderAvatar
+                  };
+                } else {
+                  merged.push(backendMsg);
+                }
               });
-            }
-          })
-          .catch((err) => {
-            console.warn('[useChatStore] History load warning:', err);
-          });
+              merged.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+              return {
+                messages: {
+                  ...state.messages,
+                  [chatId]: merged,
+                },
+              };
+            });
+          }
+        }).catch(() => {});
       }
     },
 
-    // Send Message: Optimistic UI + E2EE through MessageService + Server ACK (Rule 1 & 3 & 4)
-    sendMessage: async (chatId, content, attachment = null) => {
+    sendMessage: (chatId, content, attachment = null) => {
       if (!chatId || (!content?.trim() && !attachment)) return;
 
       const user = useAuthStore.getState().user;
-      const clientTempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const senderId = user?.id || user?._id || 'user-1';
+      const senderName = user?.name || 'You';
+      const senderUsername = user?.primaryUsername || 'user';
+      const senderAvatar = user?.avatar || null;
       const finalContent = content ? content.trim() : '';
-      const previewText =
-        finalContent || (attachment?.type === 'image' ? '📷 Photo' : `📎 ${attachment?.name || 'Attachment'}`);
+      const previewText = finalContent || (attachment?.type === 'image' ? '📷 Photo' : `📎 ${attachment?.name || 'Attachment'}`);
 
-      // Determine chat type and peer username for key derivation
-      const isDirect = chatId.startsWith('dm_') || get().contacts.some((c) => c.id === chatId);
-      const isGroup = chatId.startsWith('group-') || get().groups.some((g) => g.id === chatId);
-      const chatType = isDirect ? 'direct' : isGroup ? 'personal-group' : 'workspace-node';
-
-      let peerUsername = null;
-      if (isDirect) {
-        const contact = get().contacts.find((c) => c.id === chatId);
-        peerUsername = contact?.username;
-      }
-
-      const participantInfo = {
-        currentUsername: user?.primaryUsername,
-        currentUserId: user?.id || user?._id,
-        peerUsername,
-      };
-
-      // 1. Optimistic message placed in local chat store (instant feedback!) (Rule 3)
-      const optimisticMessage = {
-        id: clientTempId,
-        clientTempId,
+      const newMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
         chatId,
-        senderId: user?.id || user?._id || 'user-1',
-        senderName: user?.name || 'You',
-        senderUsername: user?.primaryUsername || 'user',
-        senderAvatar: user?.avatar || null,
+        senderId,
+        senderName,
+        senderUsername,
+        senderAvatar,
         content: finalContent,
         timestamp: new Date().toISOString(),
         type: attachment?.type || 'text',
         attachment: attachment || null,
         reactions: [],
-        status: 'sending',
-        isOptimistic: true,
       };
 
+      // 1. Optimistic UI update (instant feedback!)
       set((state) => {
         const updatedContacts = state.contacts.map((c) => {
           if (c.id === chatId) {
             return {
               ...c,
               lastMessage: previewText,
-              lastMessageTime: optimisticMessage.timestamp,
+              lastMessageTime: newMessage.timestamp,
             };
           }
           return c;
@@ -504,61 +404,19 @@ const useChatStore = create((set, get) => {
         return {
           messages: {
             ...state.messages,
-            [chatId]: [...(state.messages[chatId] || []), optimisticMessage],
+            [chatId]: [...(state.messages[chatId] || []), newMessage],
           },
           contacts: updatedContacts,
         };
       });
 
-      // 2. Delegate to MessageService: local encryption -> Socket.IO -> authenticate -> authorize -> persist -> ACK
-      try {
-        const result = await messageService.sendMessage({
-          clientTempId,
-          chatId,
-          content: finalContent,
-          attachment,
-          chatType,
-          participantInfo,
-        });
-
-        // 3. Server ACK received: reconcile optimistic message with server message ID
-        if (result && result.message) {
-          set((state) => {
-            const list = state.messages[chatId] || [];
-            const updated = list.map((m) =>
-              m.clientTempId === clientTempId || m.id === clientTempId
-                ? {
-                    ...m,
-                    id: result.message.id,
-                    clientTempId: undefined,
-                    status: 'sent',
-                    isOptimistic: false,
-                    timestamp: result.message.timestamp || m.timestamp,
-                  }
-                : m
-            );
-
-            return {
-              messages: {
-                ...state.messages,
-                [chatId]: updated,
-              },
-            };
-          });
-        }
-      } catch (err) {
-        console.error('[useChatStore] Send message error:', err.message);
-        // Mark optimistic message as failed
-        set((state) => {
-          const list = state.messages[chatId] || [];
-          return {
-            messages: {
-              ...state.messages,
-              [chatId]: list.map((m) =>
-                m.clientTempId === clientTempId ? { ...m, status: 'failed' } : m
-              ),
-            },
-          };
+      // 2. Realtime broadcast & persistence via Socket (or fallback to REST API if offline)
+      const socket = getSocket();
+      if (socket && socket.connected) {
+        emitSocketMessage(newMessage);
+      } else {
+        api.messages.send(chatId, newMessage).catch((err) => {
+          console.warn('[Zyntra Chat] Offline fallback persist error:', err);
         });
       }
     },
@@ -571,22 +429,10 @@ const useChatStore = create((set, get) => {
         },
       }));
 
-      messageService.deleteMessage(chatId, messageId).catch((err) => {
-        console.warn('[useChatStore] Delete message error:', err);
-      });
+      api.messages.delete(messageId).catch(() => {});
     },
 
-    editMessage: async (chatId, messageId, newContent) => {
-      const isDirect = chatId.startsWith('dm_') || get().contacts.some((c) => c.id === chatId);
-      const isGroup = chatId.startsWith('group-') || get().groups.some((g) => g.id === chatId);
-      const chatType = isDirect ? 'direct' : isGroup ? 'personal-group' : 'workspace-node';
-
-      const user = useAuthStore.getState().user;
-      const participantInfo = {
-        currentUsername: user?.primaryUsername,
-        currentUserId: user?.id || user?._id,
-      };
-
+    editMessage: (chatId, messageId, newContent) => {
       set((state) => ({
         messages: {
           ...state.messages,
@@ -596,14 +442,13 @@ const useChatStore = create((set, get) => {
         },
       }));
 
-      try {
-        await messageService.editMessage(chatId, messageId, newContent, chatType, participantInfo);
-      } catch (err) {
-        console.warn('[useChatStore] Edit message error:', err);
-      }
+      api.messages.edit(messageId, newContent).catch(() => {});
     },
 
     addReaction: (chatId, messageId, emoji) => {
+      const user = useAuthStore.getState().user;
+      const uid = user?.id || user?._id || 'user-1';
+
       set((state) => ({
         messages: {
           ...state.messages,
@@ -627,9 +472,11 @@ const useChatStore = create((set, get) => {
         },
       }));
 
-      messageService.sendReaction(chatId, messageId, emoji);
+      emitReaction(messageId, emoji, uid, chatId);
+      api.messages.addReaction(messageId, emoji, uid).catch(() => {});
     },
   };
 });
 
 export default useChatStore;
+

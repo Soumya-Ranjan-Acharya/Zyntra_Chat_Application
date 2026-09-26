@@ -1,201 +1,128 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import { messageService } from '../services/messageService.js';
-import { authorizationService } from '../services/authorizationService.js';
+import Message from '../models/Message.js';
+import { Contact } from '../models/Contact.js';
 
 export const setupChatSocket = (io) => {
-  // 1. Socket.IO Handshake Authentication Middleware (Rule 5 & 6)
-  io.use(async (socket, next) => {
-    try {
-      const authHeader = socket.handshake.headers?.authorization;
-      const token =
-        socket.handshake.auth?.token ||
-        (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null);
-
-      if (token) {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'zyntra_secret_fallback');
-        const user = await User.findById(decoded.id);
-        if (user) {
-          socket.user = user;
-          return next();
-        }
-      }
-
-      // If no token or token invalid, check if running demo user or fallback
-      if (process.env.NODE_ENV !== 'production') {
-        const demoUser = await User.findOne({ primaryUsername: 'soumya' });
-        if (demoUser) {
-          socket.user = demoUser;
-          return next();
-        }
-      }
-
-      return next(new Error('Authentication failed: Valid user credentials required'));
-    } catch (err) {
-      console.warn('[Socket.io] Auth middleware rejection:', err.message);
-      return next(new Error(`Authentication failed: ${err.message}`));
-    }
-  });
-
   io.on('connection', (socket) => {
-    const user = socket.user;
-    console.log(`[Socket.io] Client connected: ${socket.id} (User: ${user?.primaryUsername || user?._id})`);
+    console.log(`[Socket.io] Client connected: ${socket.id}`);
 
-    // 2. Join chat room with authorization verification (Rule 7 & 8)
-    socket.on('join_room', async (roomId, ackCallback) => {
-      try {
-        if (!roomId) return;
-
-        const authCheck = await authorizationService.canJoinRoom(socket.user, roomId);
-        if (!authCheck.authorized) {
-          console.warn(`[Socket.io] Unauthorized room join rejected: User ${socket.user?.primaryUsername} -> ${roomId}`);
-          if (typeof ackCallback === 'function') {
-            ackCallback({ success: false, error: authCheck.reason || 'Unauthorized' });
-          }
-          socket.emit('error_message', { message: authCheck.reason || 'Unauthorized to join room' });
-          return;
-        }
-
-        socket.join(roomId);
-        console.log(`[Socket.io] User ${socket.user?.primaryUsername} joined room: ${roomId}`);
-        if (typeof ackCallback === 'function') {
-          ackCallback({ success: true, roomId });
-        }
-      } catch (err) {
-        console.error('[Socket.io] join_room error:', err.message);
-      }
+    // Join a specific chat room (channel, DM, or personal group)
+    socket.on('join_room', (roomId) => {
+      if (!roomId) return;
+      socket.join(roomId);
+      console.log(`[Socket.io] User (${socket.id}) joined room: ${roomId}`);
     });
 
-    // 3. Leave a room (Rule 17: Context switching must not leak old socket rooms)
-    socket.on('leave_room', (roomId, ackCallback) => {
+    // Leave a room
+    socket.on('leave_room', (roomId) => {
       if (!roomId) return;
       socket.leave(roomId);
-      console.log(`[Socket.io] User ${socket.user?.primaryUsername} left room: ${roomId}`);
-      if (typeof ackCallback === 'function') {
-        ackCallback({ success: true, roomId });
-      }
+      console.log(`[Socket.io] User (${socket.id}) left room: ${roomId}`);
     });
 
-    // 4. Send Message (Rule 1: Socket.IO is ONLY message creation path; Rule 3, 4, 6)
-    socket.on('send_message', async (data, ackCallback) => {
+    // Handle incoming message
+    socket.on('send_message', async (data) => {
       try {
-        if (!data || !data.chatId) {
-          if (typeof ackCallback === 'function') {
-            ackCallback({ success: false, error: 'Chat ID is required' });
-          }
-          return;
-        }
+        const {
+          id,
+          chatId,
+          content,
+          senderId,
+          senderName,
+          senderUsername,
+          senderAvatar,
+          chatType,
+          attachment,
+          timestamp,
+        } = data;
 
-        // Delegate persistence and validation to MessageService (which checks AuthorizationService)
-        const savedMessage = await messageService.saveMessage(socket.user, data);
+        if (!chatId || (!content?.trim() && !attachment)) return;
 
-        const payload = savedMessage.toObject ? savedMessage.toObject() : savedMessage;
+        const messageId = id || `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+        const finalContent = content ? content.trim() : '';
+        const previewText = finalContent || (attachment?.type === 'image' ? '📷 Photo' : `📎 ${attachment?.name || 'Attachment'}`);
 
-        // Server ACK with saved message ID and clientTempId (Rule 3)
-        if (typeof ackCallback === 'function') {
-          ackCallback({
-            success: true,
-            message: payload,
-            clientTempId: data.clientTempId || null,
+        // Check if message with this ID already exists
+        let message = await Message.findOne({ id: messageId });
+        if (!message) {
+          message = await Message.create({
+            id: messageId,
+            chatId,
+            chatType: chatType || 'workspace-node',
+            senderId: senderId || 'user-1',
+            senderName: senderName || 'Soumya',
+            senderUsername: senderUsername || '',
+            senderAvatar: senderAvatar || null,
+            content: finalContent,
+            type: attachment?.type || 'text',
+            attachment: attachment || null,
+            reactions: [],
+            timestamp: timestamp ? new Date(timestamp) : new Date(),
           });
         }
 
-        // Broadcast ciphertext only to room peers (Rule 12, 13)
-        socket.to(data.chatId).emit('receive_message', payload);
+        // Update contacts lastMessage so sidebar updates on both sides
+        await Contact.updateMany(
+          { id: chatId },
+          { lastMessage: previewText, lastMessageTime: new Date() }
+        ).catch(() => {});
+
+        // Broadcast to peers in the room (sender already has optimistic copy)
+        const payload = message.toObject ? message.toObject() : message;
+        socket.to(chatId).emit('receive_message', payload);
       } catch (err) {
         console.error('[Socket.io] Error sending message:', err.message);
-        if (typeof ackCallback === 'function') {
-          ackCallback({ success: false, error: err.message });
-        }
-        socket.emit('error_message', { message: err.message || 'Failed to send message via socket' });
+        socket.emit('error_message', { message: 'Failed to send message via socket' });
       }
     });
 
-    // 5. Edit Message (Encrypted edit support)
-    socket.on('edit_message', async (data, ackCallback) => {
+    // Handle typing status
+    socket.on('typing_start', ({ roomId, userName, userId }) => {
+      socket.to(roomId).emit('user_typing', { userId, userName, isTyping: true });
+    });
+
+    socket.on('typing_stop', ({ roomId, userId }) => {
+      socket.to(roomId).emit('user_typing', { userId, isTyping: false });
+    });
+
+    // Handle real-time reactions
+    socket.on('send_reaction', async ({ messageId, emoji, userId, chatId }) => {
       try {
-        const { messageId, ciphertext, nonce, content, chatId } = data;
-        const updated = await messageService.editMessage(socket.user, messageId, {
-          ciphertext,
-          nonce,
-          content,
-        });
+        const message = await Message.findOne({ id: messageId });
+        if (!message) return;
 
-        const payload = updated.toObject ? updated.toObject() : updated;
-        if (typeof ackCallback === 'function') {
-          ackCallback({ success: true, message: payload });
+        const uid = userId || 'user-1';
+        const existing = message.reactions.find((r) => r.emoji === emoji);
+
+        if (existing) {
+          if (!existing.users.includes(uid)) {
+            existing.users.push(uid);
+          }
+          existing.count = existing.users.length;
+        } else {
+          message.reactions.push({
+            emoji,
+            count: 1,
+            users: [uid],
+          });
         }
 
-        io.to(chatId || updated.chatId).emit('message_edited', payload);
-      } catch (err) {
-        console.error('[Socket.io] Error editing message:', err.message);
-        if (typeof ackCallback === 'function') {
-          ackCallback({ success: false, error: err.message });
-        }
-      }
-    });
-
-    // 6. Delete Message
-    socket.on('delete_message', async (data, ackCallback) => {
-      try {
-        const { messageId, chatId } = data;
-        await messageService.deleteMessage(socket.user, messageId);
-
-        if (typeof ackCallback === 'function') {
-          ackCallback({ success: true, messageId });
-        }
-
-        io.to(chatId).emit('message_deleted', { messageId, chatId });
-      } catch (err) {
-        console.error('[Socket.io] Error deleting message:', err.message);
-        if (typeof ackCallback === 'function') {
-          ackCallback({ success: false, error: err.message });
-        }
-      }
-    });
-
-    // 7. Typing status
-    socket.on('typing_start', ({ roomId }) => {
-      if (!roomId) return;
-      socket.to(roomId).emit('user_typing', {
-        userId: socket.user._id.toString(),
-        userName: socket.user.name || socket.user.primaryUsername,
-        isTyping: true,
-      });
-    });
-
-    socket.on('typing_stop', ({ roomId }) => {
-      if (!roomId) return;
-      socket.to(roomId).emit('user_typing', {
-        userId: socket.user._id.toString(),
-        isTyping: false,
-      });
-    });
-
-    // 8. Reactions
-    socket.on('send_reaction', async ({ messageId, emoji, chatId }) => {
-      try {
-        const updated = await messageService.addReaction(socket.user, messageId, emoji);
-        if (updated) {
-          const payload = updated.toObject ? updated.toObject() : updated;
-          io.to(chatId || updated.chatId).emit('update_reaction', payload);
-        }
+        await message.save();
+        io.to(chatId || message.chatId).emit('update_reaction', message);
       } catch (err) {
         console.error('[Socket.io] Error updating reaction:', err.message);
       }
     });
 
-    // 9. Avatar update
+    // Handle real-time avatar updates
     socket.on('update_avatar', ({ username, avatar }) => {
-      const cleanUser = username || socket.user.primaryUsername;
-      if (cleanUser) {
-        io.emit('user_avatar_updated', { username: cleanUser, avatar });
+      if (username) {
+        io.emit('user_avatar_updated', { username, avatar });
       }
     });
 
-    // 10. Disconnect
+    // Disconnect
     socket.on('disconnect', () => {
-      console.log(`[Socket.io] Client disconnected: ${socket.id} (${socket.user?.primaryUsername})`);
+      console.log(`[Socket.io] Client disconnected: ${socket.id}`);
     });
   });
 };
