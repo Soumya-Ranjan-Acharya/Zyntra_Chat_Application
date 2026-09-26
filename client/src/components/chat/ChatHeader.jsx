@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Search, Info, ArrowLeft, Phone, Video, ShieldCheck, X } from 'lucide-react';
+import { Lock, Search, Info, ArrowLeft, Phone, Video, ShieldCheck, X, KeyRound } from 'lucide-react';
 import Avatar from '../ui/Avatar';
+import { encryptionService } from '../../services/encryptionService';
 
 const ChatHeader = ({
   name = 'Chat',
@@ -14,6 +15,7 @@ const ChatHeader = ({
   policy = {}
 }) => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [showFingerprint, setShowFingerprint] = useState(false);
 
   return (
     <header
@@ -71,25 +73,74 @@ const ChatHeader = ({
               {name}
             </h2>
             {isEncrypted && (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  padding: '2px 7px',
-                  borderRadius: '999px',
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                  color: '#10b981',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  border: '1px solid rgba(16, 185, 129, 0.2)',
-                  flexShrink: 0,
-                }}
-                className="hidden sm:inline-flex"
-              >
-                <ShieldCheck size={10} />
-                E2EE
-              </span>
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowFingerprint(!showFingerprint)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    padding: '2px 7px',
+                    borderRadius: '999px',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    color: '#10b981',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    border: '1px solid rgba(16, 185, 129, 0.2)',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                  title="Click to view E2EE cryptographic fingerprint"
+                  className="hidden sm:inline-flex hover:opacity-80 transition-opacity"
+                >
+                  <ShieldCheck size={10} />
+                  E2EE
+                </button>
+                <AnimatePresence>
+                  {showFingerprint && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 8px)',
+                        left: 0,
+                        width: '280px',
+                        backgroundColor: 'var(--color-bg-primary)',
+                        border: '1px solid var(--color-border-primary)',
+                        boxShadow: 'var(--elevation-3)',
+                        borderRadius: '12px',
+                        padding: '12px',
+                        zIndex: 50,
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1.5">
+                          <Lock size={12} /> End-to-End Encrypted
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowFingerprint(false)}
+                          className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-[var(--color-text-secondary)] leading-tight mb-2">
+                        Messages are encrypted on your device with AES-256-GCM. Plaintext is never stored on the server.
+                      </p>
+                      <div className="bg-[var(--color-bg-secondary)] border border-[var(--color-border-primary)] rounded-lg p-2 font-mono text-[10px] text-[var(--color-text-primary)] break-all select-all">
+                        <div className="text-[9px] uppercase tracking-wider text-[var(--color-text-tertiary)] mb-0.5">
+                          Device Key Fingerprint
+                        </div>
+                        {encryptionService.getFingerprint() || 'Initializing...'}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
           </div>
 

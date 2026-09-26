@@ -1,6 +1,6 @@
-import Message from '../models/Message.js';
-import { Contact } from '../models/Contact.js';
-import User from '../models/User.js';
+import { messageService } from '../services/messageService.js';
+import GroupKey from '../models/GroupKey.js';
+import { authorizationService } from '../services/authorizationService.js';
 
 // @desc    Get all messages for a specific chat (channel, contact, or personal group)
 // @route   GET /api/messages/:chatId
@@ -8,37 +8,7 @@ import User from '../models/User.js';
 export const getMessagesByChat = async (req, res, next) => {
   try {
     const { chatId } = req.params;
-    const messages = await Message.find({ chatId }).sort({ timestamp: 1 }).lean();
-
-    // Populate live senderAvatar from User collection if missing or outdated
-    const senderUsernames = [
-      ...new Set(
-        messages
-          .map((m) => m.senderUsername?.trim().replace(/^@/, '').toLowerCase())
-          .filter(Boolean)
-      ),
-    ];
-
-    if (senderUsernames.length > 0) {
-      const users = await User.find(
-        { primaryUsername: { $in: senderUsernames } },
-        'primaryUsername avatar'
-      ).lean();
-
-      const userAvatarMap = new Map();
-      users.forEach((u) => {
-        if (u.primaryUsername && u.avatar) {
-          userAvatarMap.set(u.primaryUsername.toLowerCase(), u.avatar);
-        }
-      });
-
-      messages.forEach((m) => {
-        const cleanSender = m.senderUsername?.trim().replace(/^@/, '').toLowerCase();
-        if ((!m.senderAvatar || m.senderAvatar.length < 5) && userAvatarMap.has(cleanSender)) {
-          m.senderAvatar = userAvatarMap.get(cleanSender);
-        }
-      });
-    }
+    const messages = await messageService.getHistory(req.user, chatId);
 
     res.status(200).json({
       success: true,
@@ -50,61 +20,15 @@ export const getMessagesByChat = async (req, res, next) => {
   }
 };
 
-// @desc    Send a new message
+// @desc    Send a new message (Rule 1: Socket.IO is ONLY message creation/write path)
 // @route   POST /api/messages/:chatId
-// @access  Public / Private
+// @access  Private / Rejected
 export const sendMessage = async (req, res, next) => {
   try {
-    const { chatId } = req.params;
-    const {
-      id,
-      content,
-      senderId,
-      senderName,
-      senderUsername,
-      senderAvatar,
-      chatType,
-      attachment,
-      timestamp,
-    } = req.body;
-
-    if (!chatId || (!content?.trim() && !attachment)) {
-      return res.status(400).json({
-        success: false,
-        message: 'chatId and either content or attachment are required',
-      });
-    }
-
-    const newId = id || `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    const finalContent = content ? content.trim() : '';
-    const previewText = finalContent || (attachment?.type === 'image' ? '📷 Photo' : `📎 ${attachment?.name || 'Attachment'}`);
-
-    let message = await Message.findOne({ id: newId });
-    if (!message) {
-      message = await Message.create({
-        id: newId,
-        chatId,
-        chatType: chatType || 'workspace-node',
-        senderId: senderId || req.user?._id?.toString() || 'user-1',
-        senderName: senderName || req.user?.name || 'Soumya',
-        senderUsername: senderUsername || req.user?.primaryUsername || '',
-        senderAvatar: senderAvatar || req.user?.avatar || null,
-        content: finalContent,
-        type: attachment?.type || 'text',
-        attachment: attachment || null,
-        reactions: [],
-        timestamp: timestamp ? new Date(timestamp) : new Date(),
-      });
-    }
-
-    await Contact.updateMany(
-      { id: chatId },
-      { lastMessage: previewText, lastMessageTime: new Date() }
-    ).catch(() => {});
-
-    res.status(201).json({
-      success: true,
-      data: message,
+    // If client attempts REST POST, enforce Rule 1
+    return res.status(405).json({
+      success: false,
+      message: 'Method Not Allowed. Socket.IO is the only message creation path.',
     });
   } catch (error) {
     next(error);
@@ -117,30 +41,24 @@ export const sendMessage = async (req, res, next) => {
 export const editMessage = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { content } = req.body;
+    const { ciphertext, nonce, content } = req.body;
 
-    if (!content?.trim()) {
+    if (!ciphertext && !content) {
       return res.status(400).json({
         success: false,
-        message: 'Content cannot be empty',
+        message: 'Ciphertext or content required for edit',
       });
     }
 
-    const message = await Message.findOne({ id });
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: 'Message not found',
-      });
-    }
-
-    message.content = content.trim();
-    message.isEdited = true;
-    await message.save();
+    const updated = await messageService.editMessage(req.user, id, {
+      ciphertext,
+      nonce,
+      content,
+    });
 
     res.status(200).json({
       success: true,
-      data: message,
+      data: updated,
     });
   } catch (error) {
     next(error);
@@ -153,14 +71,7 @@ export const editMessage = async (req, res, next) => {
 export const deleteMessage = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const message = await Message.findOneAndDelete({ id });
-
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: 'Message not found',
-      });
-    }
+    await messageService.deleteMessage(req.user, id);
 
     res.status(200).json({
       success: true,
@@ -172,13 +83,13 @@ export const deleteMessage = async (req, res, next) => {
   }
 };
 
-// @desc    Add or increment reaction on a message
+// @desc    Add reaction
 // @route   POST /api/messages/:id/reactions
 // @access  Public / Private
 export const addReaction = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { emoji, userId } = req.body;
+    const { emoji } = req.body;
 
     if (!emoji) {
       return res.status(400).json({
@@ -187,35 +98,98 @@ export const addReaction = async (req, res, next) => {
       });
     }
 
-    const message = await Message.findOne({ id });
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: 'Message not found',
-      });
-    }
-
-    const uid = userId || req.user?._id?.toString() || 'user-1';
-    const existingReaction = message.reactions.find((r) => r.emoji === emoji);
-
-    if (existingReaction) {
-      if (!existingReaction.users.includes(uid)) {
-        existingReaction.users.push(uid);
-      }
-      existingReaction.count = existingReaction.users.length;
-    } else {
-      message.reactions.push({
-        emoji,
-        count: 1,
-        users: [uid],
-      });
-    }
-
-    await message.save();
+    const updated = await messageService.addReaction(req.user, id, emoji);
 
     res.status(200).json({
       success: true,
-      data: message,
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Store or rotate encrypted group key envelope
+// @route   POST /api/messages/keys/group
+// @access  Private
+export const saveGroupKey = async (req, res, next) => {
+  try {
+    const { conversationId, epoch, keys } = req.body;
+
+    if (!conversationId || !Array.isArray(keys) || keys.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'conversationId and keys array are required',
+      });
+    }
+
+    if (req.user) {
+      const auth = await authorizationService.canAccessChat(req.user, conversationId);
+      if (!auth.authorized) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+    }
+
+    const groupKey = await GroupKey.create({
+      conversationId,
+      epoch: epoch || 1,
+      creatorId: req.user?._id?.toString() || 'user-1',
+      keys,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: groupKey,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get encrypted group key for current user in conversation
+// @route   GET /api/messages/keys/group/:conversationId
+// @access  Private
+export const getGroupKey = async (req, res, next) => {
+  try {
+    const { conversationId } = req.params;
+    const { epoch } = req.query;
+
+    if (req.user) {
+      const auth = await authorizationService.canAccessChat(req.user, conversationId);
+      if (!auth.authorized) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+    }
+
+    const query = { conversationId };
+    if (epoch) {
+      query.epoch = parseInt(epoch, 10);
+    }
+
+    // Get latest epoch for conversation
+    const groupKeyDoc = await GroupKey.findOne(query).sort({ epoch: -1 });
+
+    if (!groupKeyDoc) {
+      return res.status(404).json({
+        success: false,
+        message: 'No group key envelope found for this conversation',
+      });
+    }
+
+    const userId = req.user?._id?.toString() || 'user-1';
+    const userEnvelope = groupKeyDoc.keys.find(
+      (k) => k.userId === userId || k.userId === req.user?.primaryUsername
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        conversationId: groupKeyDoc.conversationId,
+        epoch: groupKeyDoc.epoch,
+        creatorId: groupKeyDoc.creatorId,
+        envelope: userEnvelope || null,
+        allKeysCount: groupKeyDoc.keys.length,
+      },
     });
   } catch (error) {
     next(error);

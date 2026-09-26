@@ -5,11 +5,18 @@ import {
   editMessage,
   deleteMessage,
   addReaction,
+  saveGroupKey,
+  getGroupKey,
 } from '../controllers/messageController.js';
-import { optionalProtect } from '../middleware/auth.js';
+import { optionalProtect, protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Group Key Management Routes
+router.post('/keys/group', protect, saveGroupKey);
+router.get('/keys/group/:conversationId', protect, getGroupKey);
+
+// Message History & Actions
 router.get('/:chatId', optionalProtect, getMessagesByChat);
 router.post('/:chatId', optionalProtect, sendMessage);
 router.put('/:id', optionalProtect, editMessage);

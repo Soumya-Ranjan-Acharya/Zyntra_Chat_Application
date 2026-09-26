@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Reply, SmilePlus, Pencil, Trash2, CheckCheck, FileText, Image as ImageIcon, Download } from 'lucide-react';
+import { Reply, SmilePlus, Pencil, Trash2, CheckCheck, FileText, Image as ImageIcon, Download, Lock, Clock } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import useChatStore from '../../store/useChatStore';
 import useThemeStore from '../../store/useThemeStore';
@@ -358,10 +358,17 @@ const MessageBubble = ({
                 : 'var(--color-text-tertiary)',
             }}
           >
+            {(message.isEncrypted || message.ciphertext) && (
+              <Lock size={10} style={{ opacity: 0.75 }} title="End-to-End Encrypted" />
+            )}
             {isEdited && <span style={{ fontStyle: 'italic' }}>edited</span>}
             <span>{time}</span>
             {isOwn && (
-              <CheckCheck size={12} style={{ color: sentBubbleTextColor === '#ffffff' ? 'rgba(255,255,255,0.75)' : 'currentColor' }} />
+              message.status === 'sending' ? (
+                <Clock size={11} className="animate-pulse" style={{ opacity: 0.7 }} title="Encrypting & Sending..." />
+              ) : (
+                <CheckCheck size={12} style={{ color: sentBubbleTextColor === '#ffffff' ? 'rgba(255,255,255,0.75)' : 'currentColor' }} />
+              )
             )}
           </div>
         </div>

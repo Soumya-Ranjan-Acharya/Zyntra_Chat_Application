@@ -39,6 +39,18 @@ const syncStoresForUser = async (user) => {
   try {
     const { default: useWorkspaceStore } = await import('./useWorkspaceStore');
     const { default: useChatStore } = await import('./useChatStore');
+    const { encryptionService } = await import('../services/encryptionService');
+    const { socketService } = await import('../services/socketService');
+
+    const token = localStorage.getItem('zyntra_auth_token');
+    socketService.updateAuthToken(token);
+
+    if (user) {
+      await encryptionService.initialize(user);
+    } else {
+      encryptionService.reset();
+    }
+
     useWorkspaceStore.getState().initForUser(user);
     useChatStore.getState().initForUser(user);
   } catch (e) {
