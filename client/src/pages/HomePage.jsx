@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
   Building2,
@@ -20,6 +21,50 @@ import useAuthStore from '../store/useAuthStore';
 import useWorkspaceStore from '../store/useWorkspaceStore';
 import Modal from '../components/ui/Modal';
 import ZyntraOpeningAnimation from '../components/animation/ZyntraOpeningAnimation';
+
+// Animation Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: 'spring', stiffness: 350, damping: 25 } 
+  }
+};
+
+const cardHoverVariants = {
+  rest: { 
+    scale: 1, 
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+    borderColor: 'var(--color-border-primary)'
+  },
+  hover: { 
+    scale: 1.02, 
+    boxShadow: 'var(--elevation-3)',
+    borderColor: 'var(--color-accent)',
+    transition: { type: 'spring', stiffness: 400, damping: 25 } 
+  },
+  tap: {
+    scale: 0.98
+  }
+};
+
+const buttonHoverVariants = {
+  rest: { scale: 1 },
+  hover: { scale: 1.05 },
+  tap: { scale: 0.95 }
+};
 
 const HomePage = () => {
   const { user, setActiveContext, addContext, logout } = useAuthStore();
@@ -98,7 +143,7 @@ const HomePage = () => {
     }
   };
 
-  // Create workspace - No organization type required
+  // Create workspace
   const handleCreateWorkspace = (e) => {
     e.preventDefault();
     if (!newWorkspaceName.trim()) return;
@@ -119,8 +164,6 @@ const HomePage = () => {
       setNewWorkspaceName('');
       setNewContextUsername('');
       setCreateModalOpen(false);
-
-      // Navigate to the new workspace
       handleSelectContext('workplace', newWs.id);
     }
   };
@@ -148,7 +191,6 @@ const HomePage = () => {
     setLeaveConfirmWs(null);
   };
 
-  // Partition workspaces into Created vs Joined
   const createdWorkspaces = workspaceList.filter((ws) => ws.isOwner);
   const joinedWorkspaces = workspaceList.filter((ws) => !ws.isOwner);
 
@@ -156,139 +198,162 @@ const HomePage = () => {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: '#f1f3f6',
+        backgroundColor: 'var(--color-bg-secondary)',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
+        fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+        color: 'var(--color-text-primary)'
       }}
     >
       {/* Top Application Bar */}
       <header
         style={{
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '14px 28px',
+          backgroundColor: 'var(--glass-bg)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderBottom: '1px solid var(--color-border-primary)',
+          padding: '12px 28px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           position: 'sticky',
           top: 0,
           zIndex: 40,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
+        >
           <div
             style={{
               width: '36px',
               height: '36px',
               borderRadius: '10px',
-              backgroundColor: '#05091a',
-              border: '1px solid rgba(56, 189, 248, 0.3)',
+              backgroundColor: 'var(--color-bg-primary)',
+              border: '1px solid var(--color-border-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(99, 102, 241, 0.25)',
+              boxShadow: 'var(--elevation-3)',
               overflow: 'hidden',
-              padding: '3px',
+              padding: '4px',
               flexShrink: 0
             }}
           >
             <img
-              src="/zyntra-unicorn-transparent.png"
+              src="/zyntra-logo.png"
               alt="Zyntra"
               style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />
           </div>
           <div>
-            <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+            <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
               Zyntra
             </span>
-            <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '8px', fontWeight: 500 }}>
-              Identity & Workspace Hub
+            <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginLeft: '8px', fontWeight: 500 }}>
+              Identity & Workspace
             </span>
           </div>
-        </div>
+        </motion.div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Replay Brand Opening Animation */}
-          <button
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+        >
+          <motion.button
+            variants={buttonHoverVariants}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
             onClick={() => setShowOpeningAnim(true)}
-            title="Play Zyntra 3-4s Mobile App Opening Animation"
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 13px',
+              padding: '8px 14px',
               borderRadius: '8px',
-              backgroundColor: '#070b19',
-              color: '#38bdf8',
+              backgroundColor: 'transparent',
+              color: 'var(--color-text-primary)',
               fontSize: '12px',
               fontWeight: 600,
-              border: '1px solid rgba(56, 189, 248, 0.45)',
+              border: '1px solid var(--color-border-primary)',
               cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(6, 182, 212, 0.15)',
-              transition: 'all 0.15s ease'
+              transition: 'background-color 0.2s'
             }}
           >
-            <Sparkles size={14} color="#38bdf8" />
+            <Sparkles size={14} style={{ color: 'var(--color-accent)' }} />
             <span>Replay Intro</span>
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            variants={buttonHoverVariants}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
             onClick={() => setCreateModalOpen(true)}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 14px',
+              padding: '8px 14px',
               borderRadius: '8px',
-              backgroundColor: '#1d63ff',
+              backgroundColor: 'var(--color-accent)',
               color: '#ffffff',
               fontSize: '12px',
               fontWeight: 600,
               border: 'none',
               cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(29, 99, 255, 0.2)'
+              boxShadow: '0 4px 14px 0 rgba(var(--color-accent-rgb), 0.39)'
             }}
           >
             <Plus size={15} />
             Create Workplace
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            variants={buttonHoverVariants}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
             onClick={() => setJoinModalOpen(true)}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 14px',
+              padding: '8px 14px',
               borderRadius: '8px',
-              backgroundColor: '#ffffff',
-              color: '#334155',
+              backgroundColor: 'var(--color-bg-primary)',
+              color: 'var(--color-text-primary)',
               fontSize: '12px',
               fontWeight: 600,
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--color-border-primary)',
               cursor: 'pointer'
             }}
           >
-            <KeyRound size={14} color="#64748b" />
+            <KeyRound size={14} style={{ color: 'var(--color-text-secondary)' }} />
             Join with Code
-          </button>
+          </motion.button>
 
-          <div style={{ width: '1px', height: '20px', backgroundColor: '#e2e8f0', margin: '0 4px' }} />
+          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--color-border-primary)', margin: '0 4px' }} />
 
-          <button
+          <motion.button
+            variants={buttonHoverVariants}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
             onClick={() => navigate('/settings/profile')}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 12px',
+              padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#ffffff',
-              color: '#475569',
+              border: '1px solid var(--color-border-primary)',
+              backgroundColor: 'var(--color-bg-primary)',
+              color: 'var(--color-text-primary)',
               fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer'
@@ -296,19 +361,23 @@ const HomePage = () => {
           >
             <Settings size={15} />
             Settings
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            variants={buttonHoverVariants}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
             onClick={logout}
             style={{
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 12px',
+              padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid #fee2e2',
-              backgroundColor: '#fff5f5',
-              color: '#dc2626',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              backgroundColor: 'rgba(239, 68, 68, 0.05)',
+              color: '#ef4444',
               fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer'
@@ -316,126 +385,129 @@ const HomePage = () => {
           >
             <LogOut size={15} />
             Sign Out
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </header>
 
       {/* Main Content Area */}
-      <main
+      <motion.main
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
         style={{
           flex: 1,
           width: '100%',
           maxWidth: '1100px',
           margin: '0 auto',
-          padding: '36px 24px 60px 24px',
+          padding: '40px 24px 80px 24px',
           boxSizing: 'border-box'
         }}
       >
         {/* Welcome Section */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <motion.div variants={itemVariants} style={{ textAlign: 'center', marginBottom: '40px' }}>
           <h1
             style={{
-              fontSize: '28px',
+              fontSize: '32px',
               fontWeight: 800,
-              color: '#0f172a',
-              letterSpacing: '-0.025em',
-              margin: '0 0 8px 0'
+              color: 'var(--color-text-primary)',
+              letterSpacing: '-0.03em',
+              margin: '0 0 12px 0'
             }}
           >
             Welcome, {user?.name || 'Friend'}
           </h1>
           <p
             style={{
-              fontSize: '13px',
-              color: '#64748b',
+              fontSize: '14px',
+              color: 'var(--color-text-secondary)',
               margin: '0 auto',
               maxWidth: '560px',
-              lineHeight: 1.5
+              lineHeight: 1.6
             }}
           >
             Your single permanent identity connects you to personal messaging and contextual organizational workspaces.
           </p>
-        </div>
+        </motion.div>
 
         {/* Identity Header Card */}
-        <div
+        <motion.div
+          variants={itemVariants}
           style={{
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--color-bg-primary)',
             borderRadius: '24px',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.07)',
-            border: '1px solid #e2e8f0',
+            boxShadow: 'var(--elevation-3)',
+            border: '1px solid var(--color-border-primary)',
             overflow: 'hidden',
-            marginBottom: '28px'
+            marginBottom: '32px'
           }}
         >
           <div
             style={{
-              backgroundColor: '#0a1128',
-              background: 'linear-gradient(135deg, #091129 0%, #11204d 100%)',
-              padding: '24px 32px',
+              backgroundColor: 'var(--color-bg-primary)',
+              backgroundImage: 'linear-gradient(to right, rgba(var(--color-accent-rgb), 0.05), transparent)',
+              padding: '32px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '1px solid #1e293b'
+              borderBottom: '1px solid var(--color-border-primary)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
               <div
                 style={{
-                  width: '52px',
-                  height: '52px',
+                  width: '64px',
+                  height: '64px',
                   borderRadius: '16px',
-                  backgroundColor: '#1d63ff',
-                  border: '2px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'var(--color-accent)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#ffffff',
-                  fontSize: '22px',
+                  fontSize: '28px',
                   fontWeight: 800,
-                  boxShadow: '0 4px 12px rgba(29, 99, 255, 0.35)',
+                  boxShadow: '0 8px 16px rgba(var(--color-accent-rgb), 0.3)',
                   flexShrink: 0
                 }}
               >
                 {(user?.name || user?.primaryUsername || 'U').charAt(0).toUpperCase()}
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <span
                     style={{
-                      fontSize: '10px',
+                      fontSize: '11px',
                       fontWeight: 700,
                       letterSpacing: '0.05em',
                       textTransform: 'uppercase',
-                      color: '#93c5fd',
+                      color: 'var(--color-accent)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px'
                     }}
                   >
-                    <Shield size={12} /> Primary Verified Identity
+                    <Shield size={14} /> Primary Verified Identity
                   </span>
                   <span
                     style={{
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      padding: '1px 8px',
-                      borderRadius: '10px',
-                      backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                      color: '#6ee7b7',
-                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                      color: '#10b981',
+                      border: '1px solid rgba(16, 185, 129, 0.2)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '3px'
+                      gap: '4px'
                     }}
                   >
-                    <CheckCircle2 size={10} /> Active
+                    <CheckCircle2 size={12} /> Active
                   </span>
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.02em' }}>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
                   {user?.name || 'Verified User'}
                 </div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', fontFamily: 'monospace', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontFamily: 'monospace', marginTop: '4px' }}>
                   @{user?.primaryUsername || 'user'}
                 </div>
               </div>
@@ -445,101 +517,95 @@ const HomePage = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
-                backgroundColor: 'rgba(255, 255, 255, 0.07)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: '12px',
-                padding: '10px 16px',
-                backdropFilter: 'blur(8px)'
+                gap: '12px',
+                backgroundColor: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border-primary)',
+                borderRadius: '16px',
+                padding: '12px 20px',
               }}
             >
-              <Lock size={18} color="#60a5fa" />
+              <Lock size={20} style={{ color: 'var(--color-accent)' }} />
               <div>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                   E2EE Secured Session
                 </div>
-                <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
                   Contextual routing active
                 </div>
               </div>
             </div>
           </div>
 
-          <div style={{ padding: '28px 32px' }}>
+          <div style={{ padding: '32px' }}>
             {/* Section 1: Personal Context */}
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ marginBottom: '14px' }}>
-                <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: '0 0 2px 0' }}>
+            <motion.div variants={itemVariants} style={{ marginBottom: '40px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 4px 0' }}>
                   Personal Space
                 </h2>
-                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
                   Direct 1-on-1 private messaging and casual groups using your permanent personal handle.
                 </p>
               </div>
 
-              <div
+              <motion.div
+                variants={cardHoverVariants}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
                 onClick={() => handleSelectContext('personal')}
                 style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--color-bg-primary)',
+                  border: '1px solid var(--color-border-primary)',
                   borderRadius: '16px',
-                  padding: '18px 22px',
+                  padding: '24px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#1d63ff';
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.boxShadow = '0 8px 20px -6px rgba(29, 99, 255, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.backgroundColor = '#f8fafc';
-                  e.currentTarget.style.boxShadow = 'none';
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                   <div
                     style={{
-                      width: '44px',
-                      height: '44px',
+                      width: '52px',
+                      height: '52px',
                       borderRadius: '12px',
-                      backgroundColor: '#dbeafe',
-                      color: '#1d63ff',
+                      backgroundColor: 'rgba(var(--color-accent-rgb), 0.1)',
+                      color: 'var(--color-accent)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
                   >
-                    <User size={22} />
+                    <User size={24} />
                   </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                         Personal Direct Messages & Groups
                       </span>
                       <span
                         style={{
-                          fontSize: '10px',
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: '10px',
-                          backgroundColor: '#eff6ff',
-                          color: '#1d63ff',
-                          border: '1px solid #bfdbfe'
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          padding: '3px 10px',
+                          borderRadius: '12px',
+                          backgroundColor: 'rgba(var(--color-accent-rgb), 0.1)',
+                          color: 'var(--color-accent)',
+                          border: '1px solid rgba(var(--color-accent-rgb), 0.2)'
                         }}
                       >
                         Personal
                       </span>
                     </div>
-                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '6px' }}>
                       {user?.primaryUsername === 'soumya'
                         ? 'Chat with Aarav Patel, Priya Sharma, Rahul Kumar · Context handle: '
                         : 'Direct private messaging and contact chats · Context handle: '}
-                      <code style={{ color: '#1d63ff', fontWeight: 600 }}>@{user?.primaryUsername || 'user'}.personal</code>
+                      <code style={{ color: 'var(--color-accent)', fontWeight: 600 }}>@{user?.primaryUsername || 'user'}.personal</code>
                     </div>
                   </div>
                 </div>
@@ -549,155 +615,152 @@ const HomePage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
-                    fontSize: '12.5px',
-                    fontWeight: 700,
-                    color: '#1d63ff'
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: 'var(--color-accent)'
                   }}
                 >
-                  <span>Open Personal</span>
-                  <ArrowRight size={16} />
+                  <span>Open</span>
+                  <ArrowRight size={18} />
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Section 2: Organizations You Created */}
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <motion.div variants={itemVariants} style={{ marginBottom: '40px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
                       Organizations You Created
                     </h2>
                     <span
                       style={{
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        backgroundColor: '#eff6ff',
-                        color: '#1d63ff',
-                        padding: '1px 8px',
-                        borderRadius: '10px'
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        backgroundColor: 'rgba(var(--color-accent-rgb), 0.1)',
+                        color: 'var(--color-accent)',
+                        padding: '2px 10px',
+                        borderRadius: '12px'
                       }}
                     >
                       {createdWorkspaces.length}
                     </span>
                   </div>
-                  <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0 0' }}>
                     Workspaces where you are the administrator and primary owner.
                   </p>
                 </div>
 
-                <button
+                <motion.button
+                  variants={buttonHoverVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
                   type="button"
                   onClick={() => setCreateModalOpen(true)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '5px',
-                    padding: '6px 12px',
+                    gap: '6px',
+                    padding: '8px 16px',
                     borderRadius: '8px',
-                    backgroundColor: '#eff6ff',
-                    color: '#1d63ff',
-                    border: '1px solid #bfdbfe',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
+                    backgroundColor: 'rgba(var(--color-accent-rgb), 0.1)',
+                    color: 'var(--color-accent)',
+                    border: '1px solid rgba(var(--color-accent-rgb), 0.2)',
+                    fontSize: '12px',
+                    fontWeight: 600,
                     cursor: 'pointer'
                   }}
                 >
-                  <Plus size={14} /> New Workplace
-                </button>
+                  <Plus size={16} /> New Workplace
+                </motion.button>
               </div>
 
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                  gap: '16px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                  gap: '20px'
                 }}
               >
                 {createdWorkspaces.map((ws) => (
-                  <div
+                  <motion.div
                     key={ws.id}
+                    variants={cardHoverVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
                     onClick={() => handleSelectContext('workplace', ws.id)}
                     style={{
-                      backgroundColor: '#f8fafc',
-                      border: '1px solid #e2e8f0',
+                      backgroundColor: 'var(--color-bg-primary)',
+                      border: '1px solid var(--color-border-primary)',
                       borderRadius: '16px',
-                      padding: '20px',
+                      padding: '24px',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      minHeight: '190px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#1d63ff';
-                      e.currentTarget.style.backgroundColor = '#ffffff';
-                      e.currentTarget.style.boxShadow = '0 10px 24px -8px rgba(29, 99, 255, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#e2e8f0';
-                      e.currentTarget.style.backgroundColor = '#f8fafc';
-                      e.currentTarget.style.boxShadow = 'none';
+                      minHeight: '200px'
                     }}
                   >
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                         <div
                           style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '10px',
-                            backgroundColor: '#eff6ff',
-                            color: '#1d63ff',
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '12px',
+                            backgroundColor: 'rgba(var(--color-accent-rgb), 0.1)',
+                            color: 'var(--color-accent)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}
                         >
-                          <Building2 size={20} />
+                          <Building2 size={22} />
                         </div>
                         <span
                           style={{
-                            fontSize: '10.5px',
-                            fontWeight: 700,
+                            fontSize: '11px',
+                            fontWeight: 600,
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
-                            padding: '3px 10px',
+                            padding: '4px 10px',
                             borderRadius: '12px',
-                            backgroundColor: '#fef3c7',
-                            color: '#b45309',
-                            border: '1px solid #fde68a'
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            color: '#d97706',
+                            border: '1px solid rgba(245, 158, 11, 0.2)'
                           }}
                         >
-                          <Crown size={11} /> Workspace Owner
+                          <Crown size={12} /> Workspace Owner
                         </span>
                       </div>
 
-                      <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
+                      <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 6px 0' }}>
                         {ws.name}
                       </h3>
-                      <p style={{ fontSize: '11.5px', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                      <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
                         {ws.description || 'Organizational hierarchy and departmental channels.'}
                       </p>
                     </div>
 
                     <div
                       style={{
-                        paddingTop: '14px',
-                        borderTop: '1px solid #e2e8f0',
-                        marginTop: '14px',
+                        paddingTop: '16px',
+                        borderTop: '1px solid var(--color-border-primary)',
+                        marginTop: '16px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between'
                       }}
                     >
                       <div>
-                        <span style={{ fontSize: '10px', color: '#94a3b8', display: 'block' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '2px' }}>
                           Context handle
                         </span>
-                        <span style={{ fontSize: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#1d63ff' }}>
+                        <span style={{ fontSize: '13px', fontFamily: 'monospace', fontWeight: 600, color: 'var(--color-accent)' }}>
                           @{ws.contextualUsername || `${user?.primaryUsername || 'user'}.${ws.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`}
                         </span>
                       </div>
@@ -705,286 +768,299 @@ const HomePage = () => {
                         style={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '4px',
-                          fontSize: '11.5px',
-                          fontWeight: 700,
-                          color: '#1d63ff'
+                          gap: '6px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: 'var(--color-accent)'
                         }}
                       >
                         <span>Open</span>
-                        <ArrowRight size={14} />
+                        <ArrowRight size={16} />
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
 
                 {/* Inline Add Card */}
-                <div
+                <motion.div
+                  variants={cardHoverVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
                   onClick={() => setCreateModalOpen(true)}
                   style={{
-                    backgroundColor: '#fafbfc',
-                    border: '2px dashed #cbd5e1',
+                    backgroundColor: 'transparent',
+                    border: '2px dashed var(--color-border-primary)',
                     borderRadius: '16px',
-                    padding: '20px',
+                    padding: '24px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
-                    minHeight: '190px',
-                    transition: 'all 0.15s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#1d63ff';
-                    e.currentTarget.style.backgroundColor = '#eff6ff';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#cbd5e1';
-                    e.currentTarget.style.backgroundColor = '#fafbfc';
+                    minHeight: '200px',
                   }}
                 >
                   <div
                     style={{
-                      width: '40px',
-                      height: '40px',
+                      width: '48px',
+                      height: '48px',
                       borderRadius: '50%',
-                      backgroundColor: '#ffffff',
-                      color: '#1d63ff',
-                      border: '1px solid #bfdbfe',
+                      backgroundColor: 'var(--color-bg-primary)',
+                      color: 'var(--color-accent)',
+                      border: '1px solid var(--color-border-primary)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      marginBottom: '8px'
+                      marginBottom: '12px',
+                      boxShadow: 'var(--elevation-3)'
                     }}
                   >
-                    <Plus size={20} />
+                    <Plus size={24} />
                   </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#1d63ff' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-accent)' }}>
                     Create New Organization
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
                     Define workspace structure
                   </div>
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Section 3: Organizations You Joined */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <motion.div variants={itemVariants}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
                       Organizations You Joined
                     </h2>
                     <span
                       style={{
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        backgroundColor: '#f1f5f9',
-                        color: '#475569',
-                        padding: '1px 8px',
-                        borderRadius: '10px'
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-secondary)',
+                        padding: '2px 10px',
+                        borderRadius: '12px'
                       }}
                     >
                       {joinedWorkspaces.length}
                     </span>
                   </div>
-                  <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '4px 0 0 0' }}>
                     Workspaces you have joined as a member via invitation or join code.
                   </p>
                 </div>
 
-                <button
+                <motion.button
+                  variants={buttonHoverVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
                   type="button"
                   onClick={() => setJoinModalOpen(true)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '5px',
-                    padding: '6px 12px',
+                    gap: '6px',
+                    padding: '8px 16px',
                     borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: '#475569',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '11.5px',
+                    backgroundColor: 'var(--color-bg-primary)',
+                    color: 'var(--color-text-primary)',
+                    border: '1px solid var(--color-border-primary)',
+                    fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer'
                   }}
                 >
-                  <KeyRound size={13} /> Join by Code
-                </button>
+                  <KeyRound size={14} /> Join by Code
+                </motion.button>
               </div>
 
               {joinedWorkspaces.length === 0 ? (
                 <div
                   style={{
-                    padding: '32px 24px',
-                    backgroundColor: '#f8fafc',
+                    padding: '40px 24px',
+                    backgroundColor: 'var(--color-bg-secondary)',
                     borderRadius: '16px',
-                    border: '1px dashed #cbd5e1',
+                    border: '1px dashed var(--color-border-primary)',
                     textAlign: 'center',
-                    color: '#64748b'
                   }}
                 >
-                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '8px' }}>
                     No joined organizations yet
                   </div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '14px', maxWidth: '420px', margin: '0 auto 14px auto', lineHeight: '1.5' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '20px', maxWidth: '480px', margin: '0 auto 20px auto', lineHeight: '1.6' }}>
                     Have an invitation code from your university, department, or company? Enter it below to join with your verified identity.
                   </div>
-                  <button
+                  <motion.button
+                    variants={buttonHoverVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
                     type="button"
                     onClick={() => setJoinModalOpen(true)}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 16px',
+                      gap: '8px',
+                      padding: '10px 20px',
                       borderRadius: '8px',
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      color: '#1d63ff',
+                      backgroundColor: 'var(--color-bg-primary)',
+                      border: '1px solid var(--color-border-primary)',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: 'var(--color-accent)',
                       cursor: 'pointer',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                      boxShadow: 'var(--elevation-3)'
                     }}
                   >
-                    <KeyRound size={14} /> Enter Join Code
-                  </button>
+                    <KeyRound size={16} /> Enter Join Code
+                  </motion.button>
                 </div>
               ) : (
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '16px'
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                    gap: '20px'
                   }}
                 >
                   {joinedWorkspaces.map((ws) => (
-                    <div
+                    <motion.div
                       key={ws.id}
+                      variants={cardHoverVariants}
+                      initial="rest"
+                      whileHover="hover"
                       style={{
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
+                        backgroundColor: 'var(--color-bg-primary)',
+                        border: '1px solid var(--color-border-primary)',
                         borderRadius: '16px',
-                        padding: '20px',
+                        padding: '24px',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        transition: 'all 0.15s ease',
-                        minHeight: '190px'
+                        minHeight: '200px'
                       }}
                     >
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                           <div
                             style={{
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: '10px',
-                              backgroundColor: '#f5f3ff',
+                              width: '44px',
+                              height: '44px',
+                              borderRadius: '12px',
+                              backgroundColor: 'rgba(124, 58, 237, 0.1)',
                               color: '#7c3aed',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center'
                             }}
                           >
-                            <Building2 size={20} />
+                            <Building2 size={22} />
                           </div>
                           <span
                             style={{
-                              fontSize: '10.5px',
-                              fontWeight: 700,
-                              padding: '3px 10px',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '4px 10px',
                               borderRadius: '12px',
-                              backgroundColor: '#f3e8ff',
-                              color: '#7e22ce',
-                              border: '1px solid #e9d5ff'
+                              backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                              color: '#7c3aed',
+                              border: '1px solid rgba(124, 58, 237, 0.2)'
                             }}
                           >
                             Joined Member
                           </span>
                         </div>
 
-                        <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 6px 0' }}>
                           {ws.name}
                         </h3>
-                        <p style={{ fontSize: '11.5px', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                        <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
                           Created by {ws.creatorName || 'Administrator'} · {ws.memberCount || 1200} members
                         </p>
                       </div>
 
                       <div
                         style={{
-                          paddingTop: '14px',
-                          borderTop: '1px solid #e2e8f0',
-                          marginTop: '14px',
+                          paddingTop: '16px',
+                          borderTop: '1px solid var(--color-border-primary)',
+                          marginTop: '16px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between'
                         }}
                       >
                         <div>
-                          <span style={{ fontSize: '10px', color: '#94a3b8', display: 'block' }}>
+                          <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '2px' }}>
                             Context handle
                           </span>
-                          <span style={{ fontSize: '12px', fontFamily: 'monospace', fontWeight: 700, color: '#475569' }}>
+                          <span style={{ fontSize: '13px', fontFamily: 'monospace', fontWeight: 600, color: 'var(--color-text-primary)' }}>
                             @{ws.contextualUsername || `${user?.primaryUsername || 'user'}.${ws.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`}
                           </span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <button
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <motion.button
+                            variants={buttonHoverVariants}
+                            initial="rest"
+                            whileHover="hover"
+                            whileTap="tap"
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setLeaveConfirmWs(ws);
                             }}
                             style={{
-                              padding: '4px 10px',
-                              borderRadius: '6px',
-                              backgroundColor: '#ffffff',
-                              border: '1px solid #fecaca',
-                              color: '#dc2626',
-                              fontSize: '11px',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              backgroundColor: 'var(--color-bg-primary)',
+                              border: '1px solid rgba(239, 68, 68, 0.3)',
+                              color: '#ef4444',
+                              fontSize: '12px',
                               fontWeight: 600,
                               cursor: 'pointer'
                             }}
                           >
                             Leave
-                          </button>
+                          </motion.button>
 
-                          <button
+                          <motion.button
+                            variants={buttonHoverVariants}
+                            initial="rest"
+                            whileHover="hover"
+                            whileTap="tap"
                             type="button"
                             onClick={() => handleSelectContext('workplace', ws.id)}
                             style={{
-                              padding: '4px 12px',
-                              borderRadius: '6px',
-                              backgroundColor: '#1d63ff',
+                              padding: '6px 16px',
+                              borderRadius: '8px',
+                              backgroundColor: 'var(--color-accent)',
                               border: 'none',
                               color: '#ffffff',
-                              fontSize: '11px',
-                              fontWeight: 700,
+                              fontSize: '12px',
+                              fontWeight: 600,
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '3px'
+                              gap: '6px'
                             }}
                           >
-                            Open <ArrowRight size={12} />
-                          </button>
+                            Open <ArrowRight size={14} />
+                          </motion.button>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
           </div>
-        </div>
-      </main>
+        </motion.div>
+      </motion.main>
 
       {/* ================= MODAL: CREATE NEW WORKPLACE ================= */}
       <Modal
@@ -993,15 +1069,15 @@ const HomePage = () => {
         title="Create New Workplace"
         size="md"
       >
-        <form onSubmit={handleCreateWorkspace} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleCreateWorkspace} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label
               style={{
                 display: 'block',
-                fontSize: '12px',
-                fontWeight: 700,
-                color: '#1e293b',
-                marginBottom: '6px'
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+                marginBottom: '8px'
               }}
             >
               Workplace Name
@@ -1013,15 +1089,15 @@ const HomePage = () => {
               autoFocus
               style={{
                 width: '100%',
-                padding: '11px 14px',
-                backgroundColor: '#ffffff',
-                border: '1.5px solid #3b82f6',
+                padding: '12px 16px',
+                backgroundColor: 'var(--color-bg-primary)',
+                border: '1.5px solid var(--color-accent)',
                 borderRadius: '8px',
-                fontSize: '13px',
-                color: '#0f172a',
+                fontSize: '14px',
+                color: 'var(--color-text-primary)',
                 boxSizing: 'border-box',
                 outline: 'none',
-                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
+                boxShadow: '0 0 0 3px rgba(var(--color-accent-rgb), 0.1)'
               }}
             />
           </div>
@@ -1030,16 +1106,16 @@ const HomePage = () => {
             <label
               style={{
                 display: 'block',
-                fontSize: '12px',
-                fontWeight: 700,
-                color: '#1e293b',
-                marginBottom: '6px'
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+                marginBottom: '8px'
               }}
             >
               Contextual Username in this Organization
             </label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <span style={{ position: 'absolute', left: '12px', color: '#94a3b8', fontSize: '13px', fontWeight: 600 }}>
+              <span style={{ position: 'absolute', left: '16px', color: 'var(--color-text-secondary)', fontSize: '14px', fontWeight: 600 }}>
                 @
               </span>
               <input
@@ -1048,42 +1124,42 @@ const HomePage = () => {
                 onChange={(e) => setNewContextUsername(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px 14px 10px 28px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #cbd5e1',
+                  padding: '12px 16px 12px 32px',
+                  backgroundColor: 'var(--color-bg-primary)',
+                  border: '1px solid var(--color-border-primary)',
                   borderRadius: '8px',
-                  fontSize: '13px',
-                  color: '#0f172a',
+                  fontSize: '14px',
+                  color: 'var(--color-text-primary)',
                   boxSizing: 'border-box',
                   fontFamily: 'monospace'
                 }}
               />
             </div>
-            <p style={{ fontSize: '11px', color: '#64748b', margin: '4px 0 0 0' }}>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', margin: '8px 0 0 0' }}>
               Members of this workplace will see this identity while your permanent account remains @{user?.primaryUsername || 'soumya'}.
             </p>
           </div>
 
           <div
             style={{
-              paddingTop: '16px',
-              borderTop: '1px solid #e2e8f0',
+              paddingTop: '20px',
+              borderTop: '1px solid var(--color-border-primary)',
               display: 'flex',
               justifyContent: 'flex-end',
-              gap: '10px'
+              gap: '12px'
             }}
           >
             <button
               type="button"
               onClick={() => setCreateModalOpen(false)}
               style={{
-                padding: '9px 18px',
+                padding: '10px 20px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                fontSize: '12.5px',
+                border: '1px solid var(--color-border-primary)',
+                backgroundColor: 'var(--color-bg-primary)',
+                fontSize: '13px',
                 fontWeight: 600,
-                color: '#475569',
+                color: 'var(--color-text-primary)',
                 cursor: 'pointer'
               }}
             >
@@ -1093,16 +1169,16 @@ const HomePage = () => {
               type="submit"
               disabled={!newWorkspaceName.trim()}
               style={{
-                padding: '9px 20px',
+                padding: '10px 24px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: '#1d63ff',
+                backgroundColor: 'var(--color-accent)',
                 color: '#ffffff',
-                fontSize: '12.5px',
-                fontWeight: 700,
+                fontSize: '13px',
+                fontWeight: 600,
                 cursor: newWorkspaceName.trim() ? 'pointer' : 'not-allowed',
                 opacity: newWorkspaceName.trim() ? 1 : 0.5,
-                boxShadow: '0 2px 6px rgba(29, 99, 255, 0.25)'
+                boxShadow: '0 4px 14px 0 rgba(var(--color-accent-rgb), 0.39)'
               }}
             >
               Create & Launch
@@ -1121,9 +1197,9 @@ const HomePage = () => {
         title="Join Workspace or Channel"
         size="sm"
       >
-        <form onSubmit={handleJoinWorkspace} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <form onSubmit={handleJoinWorkspace} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '8px' }}>
               Enter Join Code
             </label>
             <input
@@ -1135,35 +1211,37 @@ const HomePage = () => {
               }}
               style={{
                 width: '100%',
-                padding: '10px 14px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #cbd5e1',
+                padding: '12px 16px',
+                backgroundColor: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border-primary)',
                 borderRadius: '8px',
-                fontSize: '13px',
+                fontSize: '14px',
                 fontFamily: 'monospace',
                 fontWeight: 700,
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                color: 'var(--color-text-primary)'
               }}
             />
             {joinError && (
-              <p style={{ fontSize: '11px', color: '#dc2626', margin: '4px 0 0 0' }}>
+              <p style={{ fontSize: '12px', color: '#ef4444', margin: '8px 0 0 0' }}>
                 {joinError}
               </p>
             )}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '12px' }}>
             <button
               type="button"
               onClick={() => setJoinModalOpen(false)}
               style={{
-                padding: '8px 14px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                fontSize: '12px',
-                color: '#475569',
-                cursor: 'pointer'
+                padding: '10px 16px',
+                borderRadius: '8px',
+                border: '1px solid var(--color-border-primary)',
+                backgroundColor: 'var(--color-bg-primary)',
+                fontSize: '13px',
+                color: 'var(--color-text-primary)',
+                cursor: 'pointer',
+                fontWeight: 600
               }}
             >
               Cancel
@@ -1171,14 +1249,15 @@ const HomePage = () => {
             <button
               type="submit"
               style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
+                padding: '10px 20px',
+                borderRadius: '8px',
                 border: 'none',
-                backgroundColor: '#1d63ff',
+                backgroundColor: 'var(--color-accent)',
                 color: '#ffffff',
-                fontSize: '12px',
-                fontWeight: 700,
-                cursor: 'pointer'
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px 0 rgba(var(--color-accent-rgb), 0.39)'
               }}
             >
               Join Channel
@@ -1195,28 +1274,29 @@ const HomePage = () => {
           title={`Leave ${leaveConfirmWs.name}?`}
           size="sm"
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#b91c1c' }}>
-              <AlertTriangle size={20} />
-              <span style={{ fontSize: '13px', fontWeight: 700 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#ef4444' }}>
+              <AlertTriangle size={24} />
+              <span style={{ fontSize: '14px', fontWeight: 600 }}>
                 Confirm Workspace Departure
               </span>
             </div>
-            <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
               Are you sure you want to leave <strong>{leaveConfirmWs.name}</strong>? You will lose access to all affiliated channels and groups in this organization. You can rejoin at any time using a valid join code.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '12px' }}>
               <button
                 type="button"
                 onClick={() => setLeaveConfirmWs(null)}
                 style={{
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  fontSize: '12px',
-                  color: '#475569',
-                  cursor: 'pointer'
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--color-border-primary)',
+                  backgroundColor: 'var(--color-bg-primary)',
+                  fontSize: '13px',
+                  color: 'var(--color-text-primary)',
+                  cursor: 'pointer',
+                  fontWeight: 600
                 }}
               >
                 Cancel
@@ -1225,13 +1305,13 @@ const HomePage = () => {
                 type="button"
                 onClick={handleConfirmLeaveWorkspace}
                 style={{
-                  padding: '8px 16px',
-                  borderRadius: '6px',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
                   border: 'none',
-                  backgroundColor: '#dc2626',
+                  backgroundColor: '#ef4444',
                   color: '#ffffff',
-                  fontSize: '12px',
-                  fontWeight: 700,
+                  fontSize: '13px',
+                  fontWeight: 600,
                   cursor: 'pointer'
                 }}
               >

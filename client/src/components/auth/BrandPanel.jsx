@@ -57,9 +57,9 @@ const BrandPanel = ({ previewUsername, previewName }) => {
             border: '1px solid rgba(255,255,255,0.12)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 8px 24px rgba(37,99,235,0.3)',
-            overflow: 'hidden', padding: '4px', flexShrink: 0,
+            overflow: 'hidden', padding: '6px', flexShrink: 0,
           }}>
-            <img src="/zyntra-unicorn-transparent.png" alt="Zyntra" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src="/zyntra-logo.png" alt="Zyntra" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <h1 style={{ fontSize: '30px', fontWeight: 800, letterSpacing: '-0.03em', color: '#ffffff', margin: 0 }}>Zyntra</h1>
         </motion.div>

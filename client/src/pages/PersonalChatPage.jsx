@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import Sidebar from '../components/layout/Sidebar';
 import ChatArea from '../components/chat/ChatArea';
@@ -10,17 +11,27 @@ import AddContactModal from '../components/contacts/AddContactModal';
 import CreateGroupModal from '../components/workspace/CreateGroupModal';
 
 const PersonalChatPage = () => {
+  const { chatId } = useParams();
+  const navigate = useNavigate();
   const { activeChat, setActiveChat, messages, sendMessage, contacts = [], groups = [], addGroup } = useChatStore();
   const user = useAuthStore((s) => s.user);
   const [addContactOpen, setAddContactOpen] = useState(false);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
 
+  // Sync activeChat with URL param, or fallback to first contact
   useEffect(() => {
     document.title = 'Zyntra — Personal Space';
-    if (!activeChat && contacts.length > 0) {
+    if (chatId && chatId !== activeChat) {
+      setActiveChat(chatId);
+    } else if (!chatId && !activeChat && contacts.length > 0) {
+      // Default to first contact if no active chat
       setActiveChat(contacts[0].id);
+      navigate(`/personal/${contacts[0].id}`, { replace: true });
+    } else if (activeChat && !chatId) {
+      // If we have an active chat but no URL param (e.g. just went to /personal), update URL
+      navigate(`/personal/${activeChat}`, { replace: true });
     }
-  }, [activeChat, contacts, setActiveChat]);
+  }, [chatId, activeChat, contacts, setActiveChat, navigate]);
 
   const personalPolicy = {
     emoji: true,

@@ -180,6 +180,7 @@ const Sidebar = ({ mode = 'personal' }) => {
       };
       addContact(newContact);
       setActiveChat(newContact.id);
+      navigate(`/personal/${newContact.id}`);
       setSearch('');
     } catch (e) {
       console.warn('handleStartChatWithUser error:', e);
@@ -444,7 +445,10 @@ const Sidebar = ({ mode = 'personal' }) => {
                         <ContactCard
                           contact={contact}
                           isActive={activeChat === contact.id}
-                          onClick={() => setActiveChat(contact.id)}
+                          onClick={() => {
+                            setActiveChat(contact.id);
+                            navigate(`/personal/${contact.id}`);
+                          }}
                         />
                       </motion.div>
                     ))}
@@ -492,7 +496,10 @@ const Sidebar = ({ mode = 'personal' }) => {
                             variants={itemVariants}
                             whileTap={{ scale: 0.98 }}
                             type="button"
-                            onClick={() => setActiveChat(group.id)}
+                            onClick={() => {
+                              setActiveChat(group.id);
+                              navigate(`/personal/${group.id}`);
+                            }}
                             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border text-left transition-all duration-150 mb-0.5 ${isActive ? 'bg-[rgba(var(--color-accent-rgb),0.14)] border-[rgba(var(--color-accent-rgb),0.3)]' : 'bg-transparent border-transparent hover:bg-[var(--sidebar-hover)]'}`}
                           >
                             {/* Active left bar */}
