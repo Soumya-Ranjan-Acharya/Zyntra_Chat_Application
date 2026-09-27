@@ -70,14 +70,6 @@ const UserSchema = new mongoose.Schema(
       enum: ['online', 'away', 'offline'],
       default: 'online',
     },
-    publicKey: {
-      type: String,
-      default: null,
-    },
-    keyFingerprint: {
-      type: String,
-      default: null,
-    },
     lastActive: {
       type: Date,
       default: Date.now,

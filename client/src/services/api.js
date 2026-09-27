@@ -72,13 +72,6 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(context),
       }),
-    uploadKeys: (keys) =>
-      request('/auth/keys', {
-        method: 'POST',
-        body: JSON.stringify(keys),
-      }),
-    getPublicKey: (identifier) =>
-      request(`/auth/keys/${encodeURIComponent(identifier)}`),
     logout: () => {
       localStorage.removeItem('zyntra_auth_token');
     },
@@ -119,13 +112,6 @@ export const api = {
   // Messages
   messages: {
     getByChat: (chatId) => request(`/messages/${chatId}`),
-    saveGroupKey: (keyData) =>
-      request('/messages/keys/group', {
-        method: 'POST',
-        body: JSON.stringify(keyData),
-      }),
-    getGroupKey: (conversationId, epoch) =>
-      request(`/messages/keys/group/${encodeURIComponent(conversationId)}${epoch ? `?epoch=${epoch}` : ''}`),
     send: (chatId, messageData) =>
       request(`/messages/${chatId}`, {
         method: 'POST',

@@ -55,27 +55,7 @@ const MessageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      default: null,
-    },
-    ciphertext: {
-      type: String,
-      default: null,
-    },
-    nonce: {
-      type: String,
-      default: null,
-    },
-    encryptionVersion: {
-      type: Number,
-      default: 1,
-    },
-    keyId: {
-      type: String,
-      default: null,
-    },
-    clientTempId: {
-      type: String,
-      default: null,
+      default: '',
     },
     type: {
       type: String,
