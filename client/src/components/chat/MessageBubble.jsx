@@ -99,7 +99,7 @@ const MessageBubble = ({
       {/* Bubble + Actions */}
       <div
         style={{
-          maxWidth: '62%',
+          maxWidth: 'min(86%, 520px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: isOwn ? 'flex-end' : 'flex-start',

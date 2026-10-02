@@ -17,7 +17,7 @@ const ChatHeader = ({
 
   return (
     <header
-      className="pl-[48px] lg:pl-5 pr-5 py-2.5"
+      className="pl-[52px] lg:pl-5 pr-3 sm:pr-5 py-2.5"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -86,9 +86,10 @@ const ChatHeader = ({
                   flexShrink: 0,
                 }}
                 className="hidden sm:inline-flex"
+                title="Encrypted"
               >
-                <ShieldCheck size={10} />
-                E2EE
+                <ShieldCheck size={11} />
+                Encrypted
               </span>
             )}
           </div>
@@ -145,7 +146,7 @@ const ChatHeader = ({
           {searchOpen && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 200, opacity: 1 }}
+              animate={{ width: 140, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
               style={{ overflow: 'hidden' }}

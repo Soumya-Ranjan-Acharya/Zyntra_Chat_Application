@@ -302,12 +302,12 @@ export default function ModernEmojiPicker({ onSelectEmoji, onClose }) {
         bottom: '100%',
         left: 0,
         marginBottom: '10px',
-        width: '376px',
-        maxHeight: '450px',
-        backgroundColor: '#ffffff',
-        border: '1px solid #e2e8f0',
+        width: 'min(360px, calc(100vw - 28px))',
+        maxHeight: 'min(440px, 60vh)',
+        backgroundColor: 'var(--color-bg-primary)',
+        border: '1px solid var(--color-border-primary)',
         borderRadius: '16px',
-        boxShadow: '0 20px 35px -5px rgba(15, 23, 42, 0.18), 0 10px 18px -6px rgba(15, 23, 42, 0.1)',
+        boxShadow: 'var(--elevation-3)',
         display: 'flex',
         flexDirection: 'column',
         zIndex: 100,
@@ -319,9 +319,9 @@ export default function ModernEmojiPicker({ onSelectEmoji, onClose }) {
       {/* Top Search Bar */}
       <div
         style={{
-          padding: '12px 14px 8px 14px',
-          borderBottom: '1px solid #f1f5f9',
-          backgroundColor: '#ffffff'
+          padding: '10px 12px 8px 12px',
+          borderBottom: '1px solid var(--color-border-primary)',
+          backgroundColor: 'var(--color-bg-primary)'
         }}
       >
         <div
@@ -336,7 +336,7 @@ export default function ModernEmojiPicker({ onSelectEmoji, onClose }) {
             style={{
               position: 'absolute',
               left: '10px',
-              color: '#94a3b8',
+              color: 'var(--color-text-tertiary)',
               pointerEvents: 'none'
             }}
           />
@@ -351,16 +351,16 @@ export default function ModernEmojiPicker({ onSelectEmoji, onClose }) {
               height: '34px',
               padding: '0 32px 0 32px',
               borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: '#f8fafc',
+              border: '1px solid var(--color-border-primary)',
+              backgroundColor: 'var(--color-bg-secondary)',
               fontSize: '13px',
-              color: '#0f172a',
+              color: 'var(--color-text-primary)',
               outline: 'none',
               transition: 'all 0.15s ease',
               boxSizing: 'border-box'
             }}
-            onFocus={(e) => (e.target.style.borderColor = '#3b82f6')}
-            onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
+            onFocus={(e) => (e.target.style.borderColor = 'var(--color-accent)')}
+            onBlur={(e) => (e.target.style.borderColor = 'var(--color-border-primary)')}
           />
           {searchQuery && (
             <button

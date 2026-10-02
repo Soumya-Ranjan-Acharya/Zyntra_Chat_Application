@@ -27,24 +27,24 @@ const SettingsLayout = ({ children }) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '24px 20px',
         boxSizing: 'border-box',
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
       }}
+      className="p-2 sm:p-5"
     >
-      {/* Outer Card Container matching media_1789559080552.png */}
+      {/* Outer Card Container */}
       <div
         style={{
           width: '100%',
           maxWidth: '1060px',
           backgroundColor: 'var(--color-bg-primary)',
-          borderRadius: '24px',
+          borderRadius: '20px',
           boxShadow: 'var(--elevation-3)',
           border: '1px solid var(--color-border-primary)',
-          padding: '28px 36px 36px 36px',
           boxSizing: 'border-box',
           margin: '0 auto'
         }}
+        className="p-3.5 sm:p-7"
       >
         {/* Top Header Bar matching media_1789559080552.png */}
         <div
@@ -176,14 +176,14 @@ const SettingsLayout = ({ children }) => {
           </div>
         </div>
 
-        {/* The Crisp Blue Bordered Container matching media_1789559080552.png */}
+        {/* The Crisp Blue Bordered Container */}
         <div
           style={{
             border: '2px solid var(--color-accent)',
             borderRadius: '14px',
-            padding: '28px 32px',
             backgroundColor: 'var(--color-bg-primary)'
           }}
+          className="p-3.5 sm:p-6 md:p-8"
         >
           {children}
         </div>

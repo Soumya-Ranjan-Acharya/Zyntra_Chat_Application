@@ -207,29 +207,22 @@ const HomePage = () => {
     >
       {/* Top Application Bar */}
       <header
+        className="px-3 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40 border-b border-[var(--color-border-primary)]"
         style={{
           backgroundColor: 'var(--glass-bg)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid var(--color-border-primary)',
-          padding: '12px 28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 40,
         }}
       >
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          style={{ display: 'flex', alignItems: 'center', gap: '12px' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
         >
           <div
             style={{
-              width: '36px',
-              height: '36px',
+              width: '34px',
+              height: '34px',
               borderRadius: '10px',
               backgroundColor: 'var(--color-bg-primary)',
               border: '1px solid var(--color-border-primary)',
@@ -249,10 +242,10 @@ const HomePage = () => {
             />
           </div>
           <div>
-            <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
+            <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
               Zyntra
             </span>
-            <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginLeft: '8px', fontWeight: 500 }}>
+            <span className="hidden md:inline text-xs text-[var(--color-text-secondary)] ml-2 font-medium">
               Identity & Workspace
             </span>
           </div>
@@ -261,7 +254,7 @@ const HomePage = () => {
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          className="flex items-center gap-1.5 sm:gap-2.5"
         >
           <motion.button
             variants={buttonHoverVariants}
@@ -269,20 +262,7 @@ const HomePage = () => {
             whileHover="hover"
             whileTap="tap"
             onClick={() => setShowOpeningAnim(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              backgroundColor: 'transparent',
-              color: 'var(--color-text-primary)',
-              fontSize: '12px',
-              fontWeight: 600,
-              border: '1px solid var(--color-border-primary)',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s'
-            }}
+            className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-[var(--color-border-primary)] text-[var(--color-text-primary)] cursor-pointer"
           >
             <Sparkles size={14} style={{ color: 'var(--color-accent)' }} />
             <span>Replay Intro</span>
@@ -294,23 +274,11 @@ const HomePage = () => {
             whileHover="hover"
             whileTap="tap"
             onClick={() => setCreateModalOpen(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              backgroundColor: 'var(--color-accent)',
-              color: '#ffffff',
-              fontSize: '12px',
-              fontWeight: 600,
-              border: 'none',
-              cursor: 'pointer',
-              boxShadow: '0 4px 14px 0 rgba(var(--color-accent-rgb), 0.39)'
-            }}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg bg-[var(--color-accent)] text-white text-xs font-semibold cursor-pointer shadow-md"
           >
             <Plus size={15} />
-            Create Workplace
+            <span className="hidden sm:inline">Create Workplace</span>
+            <span className="sm:hidden">New</span>
           </motion.button>
 
           <motion.button
@@ -319,25 +287,14 @@ const HomePage = () => {
             whileHover="hover"
             whileTap="tap"
             onClick={() => setJoinModalOpen(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              backgroundColor: 'var(--color-bg-primary)',
-              color: 'var(--color-text-primary)',
-              fontSize: '12px',
-              fontWeight: 600,
-              border: '1px solid var(--color-border-primary)',
-              cursor: 'pointer'
-            }}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-lg bg-[var(--color-bg-primary)] border border-[var(--color-border-primary)] text-[var(--color-text-primary)] text-xs font-semibold cursor-pointer"
           >
-            <KeyRound size={14} style={{ color: 'var(--color-text-secondary)' }} />
-            Join with Code
+            <KeyRound size={14} className="text-[var(--color-text-secondary)]" />
+            <span className="hidden sm:inline">Join with Code</span>
+            <span className="sm:hidden">Join</span>
           </motion.button>
 
-          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--color-border-primary)', margin: '0 4px' }} />
+          <div className="hidden sm:block w-[1px] h-6 bg-[var(--color-border-primary)] my-0 mx-1" />
 
           <motion.button
             variants={buttonHoverVariants}
@@ -345,22 +302,11 @@ const HomePage = () => {
             whileHover="hover"
             whileTap="tap"
             onClick={() => navigate('/settings/profile')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              border: '1px solid var(--color-border-primary)',
-              backgroundColor: 'var(--color-bg-primary)',
-              color: 'var(--color-text-primary)',
-              fontSize: '12px',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
+            className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-lg border border-[var(--color-border-primary)] bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] text-xs font-semibold cursor-pointer"
+            title="Settings"
           >
             <Settings size={15} />
-            Settings
+            <span className="hidden sm:inline">Settings</span>
           </motion.button>
 
           <motion.button
@@ -369,22 +315,11 @@ const HomePage = () => {
             whileHover="hover"
             whileTap="tap"
             onClick={logout}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              backgroundColor: 'rgba(239, 68, 68, 0.05)',
-              color: '#ef4444',
-              fontSize: '12px',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
+            className="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 text-xs font-semibold cursor-pointer"
+            title="Sign Out"
           >
             <LogOut size={15} />
-            Sign Out
+            <span className="hidden sm:inline">Sign Out</span>
           </motion.button>
         </motion.div>
       </header>
@@ -442,28 +377,24 @@ const HomePage = () => {
           }}
         >
           <div
+            className="p-4 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--color-border-primary)]"
             style={{
               backgroundColor: 'var(--color-bg-primary)',
               backgroundImage: 'linear-gradient(to right, rgba(var(--color-accent-rgb), 0.05), transparent)',
-              padding: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid var(--color-border-primary)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div
                 style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '16px',
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '14px',
                   backgroundColor: 'var(--color-accent)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: '#ffffff',
-                  fontSize: '28px',
+                  fontSize: '24px',
                   fontWeight: 800,
                   boxShadow: '0 8px 16px rgba(var(--color-accent-rgb), 0.3)',
                   flexShrink: 0
@@ -471,8 +402,8 @@ const HomePage = () => {
               >
                 {(user?.name || user?.primaryUsername || 'U').charAt(0).toUpperCase()}
               </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <div className="min-w-0">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   <span
                     style={{
                       fontSize: '11px',
@@ -504,10 +435,10 @@ const HomePage = () => {
                     <CheckCircle2 size={12} /> Active
                   </span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
                   {user?.name || 'Verified User'}
                 </div>
-                <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontFamily: 'monospace', marginTop: '4px' }}>
+                <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontFamily: 'monospace', marginTop: '2px' }}>
                   @{user?.primaryUsername || 'user'}
                 </div>
               </div>
@@ -520,14 +451,14 @@ const HomePage = () => {
                 gap: '12px',
                 backgroundColor: 'var(--color-bg-secondary)',
                 border: '1px solid var(--color-border-primary)',
-                borderRadius: '16px',
-                padding: '12px 20px',
+                borderRadius: '14px',
+                padding: '10px 16px',
               }}
             >
-              <Lock size={20} style={{ color: 'var(--color-accent)' }} />
+              <Lock size={18} style={{ color: 'var(--color-accent)' }} />
               <div>
                 <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                  E2EE Secured Session
+                  Secured Session
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
                   Contextual routing active
@@ -536,10 +467,10 @@ const HomePage = () => {
             </div>
           </div>
 
-          <div style={{ padding: '32px' }}>
+          <div className="p-4 sm:p-7 lg:p-8">
             {/* Section 1: Personal Context */}
-            <motion.div variants={itemVariants} style={{ marginBottom: '40px' }}>
-              <div style={{ marginBottom: '16px' }}>
+            <motion.div variants={itemVariants} style={{ marginBottom: '32px' }}>
+              <div style={{ marginBottom: '14px' }}>
                 <h2 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 4px 0' }}>
                   Personal Space
                 </h2>
@@ -680,8 +611,8 @@ const HomePage = () => {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                  gap: '20px'
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+                  gap: '16px'
                 }}
               >
                 {createdWorkspaces.map((ws) => (
@@ -924,8 +855,8 @@ const HomePage = () => {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                    gap: '20px'
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+                    gap: '16px'
                   }}
                 >
                   {joinedWorkspaces.map((ws) => (

@@ -3,7 +3,7 @@ import { Layers } from 'lucide-react';
 import TreeView from '../ui/TreeView';
 import useWorkspaceStore from '../../store/useWorkspaceStore';
 
-const WorkspaceHierarchy = ({ filterSearch = '' }) => {
+const WorkspaceHierarchy = ({ filterSearch = '', onSelectMobile }) => {
   const { nodes, activeWorkspace, activeNodeId, expandedNodes, leftNodeIds = [], setActiveNode, toggleNode } =
     useWorkspaceStore();
 
@@ -102,7 +102,10 @@ const WorkspaceHierarchy = ({ filterSearch = '' }) => {
         expandedNodes={expandedNodes}
         selectedNodeId={activeNodeId}
         onToggle={toggleNode}
-        onSelect={setActiveNode}
+        onSelect={(id) => {
+          setActiveNode(id);
+          onSelectMobile?.();
+        }}
       />
     </div>
   );

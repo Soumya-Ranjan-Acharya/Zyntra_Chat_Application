@@ -190,13 +190,12 @@ const MessageList = ({ messages = [], currentUserId, policy = {}, chatId, onRepl
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '8px 24px 16px',
           display: 'flex',
           flexDirection: 'column',
           boxSizing: 'border-box',
           height: '100%',
         }}
-        className="custom-scrollbar"
+        className="custom-scrollbar px-3 sm:px-6 pt-2 pb-4 touch-scroll"
       >
         {renderList.map((item) => {
           if (item.type === 'date') {

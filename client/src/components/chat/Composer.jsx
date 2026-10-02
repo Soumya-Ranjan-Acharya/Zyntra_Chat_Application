@@ -105,7 +105,7 @@ const Composer = ({ onSend, policy = {}, disabled, replyingTo, onCancelReply }) 
       onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
       onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files?.[0]) handleProcessFile(e.dataTransfer.files[0]); }}
       style={{
-        padding: '10px 20px 16px',
+        padding: '8px 12px calc(8px + env(safe-area-inset-bottom, 0px)) 12px',
         borderTop: '1px solid var(--color-border-primary)',
         backgroundColor: 'var(--color-bg-primary)',
         position: 'relative',
@@ -239,8 +239,8 @@ const Composer = ({ onSend, policy = {}, disabled, replyingTo, onCancelReply }) 
       </AnimatePresence>
 
       {/* Main input row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="hidden sm:block" style={{ flexShrink: 0 }}>
           <Avatar name={user?.name || 'User'} src={user?.avatar} size="sm" status="online" />
         </div>
 

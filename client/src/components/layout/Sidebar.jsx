@@ -43,7 +43,7 @@ const getGroupGradient = (name = '') => {
   return groupGradients[Math.abs(hash) % groupGradients.length];
 };
 
-const Sidebar = ({ mode = 'personal' }) => {
+const Sidebar = ({ mode = 'personal', onCloseMobile }) => {
   const [search, setSearch] = useState('');
   const [contextDropdownOpen, setContextDropdownOpen] = useState(false);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
@@ -122,6 +122,7 @@ const Sidebar = ({ mode = 'personal' }) => {
 
   const handleSwitchContext = (type, ws = null) => {
     setContextDropdownOpen(false);
+    onCloseMobile?.();
     const primary = user?.primaryUsername || 'user';
     if (type === 'personal') {
       const pCtx = user?.contexts?.find((c) => c.type === 'personal') || {
@@ -181,6 +182,7 @@ const Sidebar = ({ mode = 'personal' }) => {
       addContact(newContact);
       setActiveChat(newContact.id);
       navigate(`/personal/${newContact.id}`);
+      onCloseMobile?.();
       setSearch('');
     } catch (e) {
       console.warn('handleStartChatWithUser error:', e);
@@ -368,7 +370,7 @@ const Sidebar = ({ mode = 'personal' }) => {
               </div>
             </div>
           ) : (
-            <WorkspaceHierarchy filterSearch={search} />
+            <WorkspaceHierarchy filterSearch={search} onSelectMobile={onCloseMobile} />
           )
         ) : (
           /* PERSONAL MODE LIST */
@@ -448,6 +450,7 @@ const Sidebar = ({ mode = 'personal' }) => {
                           onClick={() => {
                             setActiveChat(contact.id);
                             navigate(`/personal/${contact.id}`);
+                            onCloseMobile?.();
                           }}
                         />
                       </motion.div>
@@ -499,6 +502,7 @@ const Sidebar = ({ mode = 'personal' }) => {
                             onClick={() => {
                               setActiveChat(group.id);
                               navigate(`/personal/${group.id}`);
+                              onCloseMobile?.();
                             }}
                             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl border text-left transition-all duration-150 mb-0.5 ${isActive ? 'bg-[rgba(var(--color-accent-rgb),0.14)] border-[rgba(var(--color-accent-rgb),0.3)]' : 'bg-transparent border-transparent hover:bg-[var(--sidebar-hover)]'}`}
                           >

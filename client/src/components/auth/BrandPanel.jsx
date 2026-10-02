@@ -23,17 +23,9 @@ const BrandPanel = ({ previewUsername, previewName }) => {
 
   return (
     <div
+      className="hidden lg:flex flex-col justify-between p-11 relative overflow-hidden select-none min-w-[340px] flex-[0_0_45%]"
       style={{
-        position: 'relative',
-        overflow: 'hidden',
         color: '#ffffff',
-        padding: '44px 44px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        userSelect: 'none',
-        flex: '0 0 45%',
-        minWidth: '340px',
         background: 'linear-gradient(-45deg, #080c1e, #0d1530, #08122a, #050a1a)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 16s ease infinite',

@@ -26,7 +26,8 @@ const AppLayout = ({ children, sidebar }) => {
       style={{
         display: 'flex',
         width: '100vw',
-        height: '100vh',
+        minHeight: '100vh',
+        height: '100dvh',
         overflow: 'hidden',
         backgroundColor: 'var(--color-bg-primary)',
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
@@ -39,40 +40,57 @@ const AppLayout = ({ children, sidebar }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 lg:hidden"
-            style={{ backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
+            style={{ backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
             onClick={() => setSidebarOpen(false)}
           />
         )}
       </AnimatePresence>
 
-      {/* Left Sidebar */}
+      {/* Left Sidebar Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 w-[86vw] max-w-[320px] sm:w-[320px] transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         style={{
-          width: '320px',
-          minWidth: '320px',
-          maxWidth: '320px',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: 'var(--sidebar-bg)',
           color: 'var(--sidebar-text)',
           borderRight: '1px solid var(--sidebar-border)',
-          zIndex: 50, // above the mobile backdrop
+          zIndex: 50,
+          boxShadow: sidebarOpen ? '0 0 40px rgba(0,0,0,0.5)' : 'none',
         }}
       >
+        {/* Mobile Drawer Top Close Header */}
+        <div className="lg:hidden flex items-center justify-between px-3.5 py-2.5 border-b border-[var(--sidebar-border)] bg-[var(--color-bg-primary)]">
+          <div className="flex items-center gap-2">
+            <img src="/zyntra-logo.png" alt="Zyntra" className="w-5 h-5 object-contain" />
+            <span className="font-bold text-xs tracking-tight text-[var(--color-text-primary)]">Zyntra Navigation</span>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setSidebarOpen(false)}
+            className="p-1 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors"
+            title="Close menu"
+          >
+            <X size={18} />
+          </motion.button>
+        </div>
+
         {/* Sidebar content */}
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-          {sidebar}
+          {React.isValidElement(sidebar)
+            ? React.cloneElement(sidebar, { onCloseMobile: () => setSidebarOpen(false) })
+            : sidebar}
         </div>
 
         {/* Bottom User Bar */}
         <div
           style={{
-            padding: '10px 12px',
+            padding: '10px 12px calc(10px + env(safe-area-inset-bottom, 0px))',
             backgroundColor: 'rgba(0,0,0,0.2)',
             borderTop: '1px solid var(--sidebar-border)',
             display: 'flex',
@@ -109,25 +127,32 @@ const AppLayout = ({ children, sidebar }) => {
         </div>
       </aside>
 
-      {/* Mobile hamburger */}
-      <div className="lg:hidden fixed top-3 left-3 z-50">
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          style={{
-            padding: '8px', borderRadius: '12px',
-            backgroundColor: 'var(--sidebar-bg)',
-            color: 'var(--sidebar-text)',
-            boxShadow: 'var(--elevation-3)',
-            border: '1px solid var(--sidebar-border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer',
-          }}
-          aria-label="Toggle navigation menu"
-        >
-          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-        </motion.button>
-      </div>
+      {/* Mobile hamburger button */}
+      {!sidebarOpen && (
+        <div className="lg:hidden fixed top-2.5 left-2.5 z-30">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setSidebarOpen(true)}
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '11px',
+              backgroundColor: 'var(--color-bg-primary)',
+              color: 'var(--color-text-primary)',
+              boxShadow: 'var(--elevation-2)',
+              border: '1px solid var(--color-border-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              backdropFilter: 'blur(8px)',
+            }}
+            aria-label="Open navigation menu"
+          >
+            <Menu size={19} />
+          </motion.button>
+        </div>
+      )}
 
       {/* Main content */}
       <main
