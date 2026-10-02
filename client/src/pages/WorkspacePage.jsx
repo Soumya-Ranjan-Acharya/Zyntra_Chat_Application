@@ -191,7 +191,16 @@ const WorkspacePage = () => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col h-full w-full overflow-hidden">
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            overflow: 'hidden',
+          }}
+        >
           {/* Top Breadcrumb Navigation Bar */}
           <TopBar
             breadcrumbPath={breadcrumbPath}
@@ -204,9 +213,27 @@ const WorkspacePage = () => {
           />
 
           {/* Workspace Body: Chat Area + Optional Slide-out Info Drawer */}
-          <div className="flex flex-1 min-h-0 relative overflow-hidden">
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              display: 'flex',
+              flexDirection: 'row',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
             {/* Main Chat Canvas */}
-            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                overflow: 'hidden',
+              }}
+            >
               <ChatArea
                 chatId={activeNodeId}
                 chatName={currentNode?.name || 'Channel'}
@@ -226,7 +253,16 @@ const WorkspacePage = () => {
 
             {/* Group Details Drawer */}
             {showInfo && currentNode && (
-              <div className="w-[390px] shrink-0 h-full z-20 transition-all duration-250 animate-in slide-in-from-right">
+              <div
+                style={{
+                  width: '390px',
+                  flexShrink: 0,
+                  height: '100%',
+                  zIndex: 20,
+                  transition: 'all 250ms',
+                }}
+                className="animate-in slide-in-from-right border-l border-[var(--color-border-primary)] shadow-[-10px_0_30px_rgba(0,0,0,0.05)]"
+              >
                 <GroupInfoPanel
                   node={currentNode}
                   onClose={() => setShowInfo(false)}

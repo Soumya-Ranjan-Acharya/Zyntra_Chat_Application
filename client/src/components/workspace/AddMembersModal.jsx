@@ -191,7 +191,7 @@ const AddMembersModal = ({ isOpen, onClose, node, onAddMembers }) => {
                   key={user.id || user.username}
                   className="inline-flex items-center gap-1.5 bg-white border border-blue-200 text-blue-800 pl-1 pr-2 py-0.5 rounded-full text-xs shadow-xs group"
                 >
-                  <Avatar name={user.name} avatarUrl={user.avatar} size="xs" />
+                  <Avatar name={user.name} src={user.avatar} size="sm" />
                   <span className="font-medium text-[11px] truncate max-w-[110px]">
                     {user.name}
                   </span>
@@ -245,7 +245,7 @@ const AddMembersModal = ({ isOpen, onClose, node, onAddMembers }) => {
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <Avatar name={user.name} avatarUrl={user.avatar} size="sm" />
+                      <Avatar name={user.name} src={user.avatar} size="sm" />
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-semibold text-slate-800 truncate">

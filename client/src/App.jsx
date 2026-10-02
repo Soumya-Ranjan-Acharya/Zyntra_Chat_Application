@@ -23,6 +23,8 @@ function ProtectedRoute({ children }) {
 
 /* ---- Guest-only Route Wrapper ---- */
 function GuestRoute({ children }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (isAuthenticated) return <Navigate to="/" replace />;
   return children;
 }
 

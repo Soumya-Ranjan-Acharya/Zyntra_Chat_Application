@@ -31,16 +31,19 @@ const PersonalChatPage = () => {
       // On mobile at /personal, show the chat list
       if (!isDesktop) {
         if (activeChat) setActiveChat(null);
-      } else if (contacts.length > 0) {
+      } else if (contacts.length > 0 || groups.length > 0) {
         // On desktop, auto-select activeChat or first contact for dual-pane view
-        const target = (activeChat && contacts.some((c) => c.id === activeChat))
+        const target = (activeChat && (contacts.some((c) => c.id === activeChat) || groups.some((g) => g.id === activeChat)))
           ? activeChat
-          : contacts[0].id;
-        setActiveChat(target);
-        navigate(`/personal/${target}`, { replace: true });
+          : (contacts[0]?.id || groups[0]?.id);
+        
+        if (target) {
+          setActiveChat(target);
+          navigate(`/personal/${target}`, { replace: true });
+        }
       }
     }
-  }, [chatId, activeChat, contacts, setActiveChat, navigate]);
+  }, [chatId, activeChat, contacts, groups, setActiveChat, navigate]);
 
   const personalPolicy = {
     emoji: true,
