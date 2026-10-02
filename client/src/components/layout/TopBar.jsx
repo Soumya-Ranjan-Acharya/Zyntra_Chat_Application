@@ -1,15 +1,15 @@
 import React from 'react';
-import { Search, Bell, Shield } from 'lucide-react';
+import { Search, Bell, ArrowLeft } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import WorkspaceBreadcrumb from '../workspace/WorkspaceBreadcrumb';
 import useAuthStore from '../../store/useAuthStore';
 
-const TopBar = ({ breadcrumbPath, onNavigateBreadcrumb, title }) => {
+const TopBar = ({ breadcrumbPath, onNavigateBreadcrumb, title, onBackClick }) => {
   const user = useAuthStore((s) => s.user);
 
   return (
     <div
-      className="pl-[48px] lg:pl-6 pr-6 py-2.5"
+      className="px-3 sm:px-6 py-2 sm:py-2.5"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -19,10 +19,21 @@ const TopBar = ({ breadcrumbPath, onNavigateBreadcrumb, title }) => {
         boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
         flexShrink: 0,
         userSelect: 'none',
-        zIndex: 10
+        zIndex: 10,
+        minHeight: '56px',
       }}
     >
-      <div style={{ flex: 1, minWidth: 0, paddingRight: '20px', marginRight: '8px' }}>
+      <div className="flex items-center min-w-0 flex-1 pr-3 sm:pr-5 mr-2">
+        {onBackClick && (
+          <button
+            onClick={onBackClick}
+            className="lg:hidden p-1.5 -ml-1 mr-2 rounded-full text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] transition-colors shrink-0"
+            title="Back to channels"
+          >
+            <ArrowLeft size={18} />
+          </button>
+        )}
+
         {breadcrumbPath && breadcrumbPath.length > 0 ? (
           <WorkspaceBreadcrumb
             path={breadcrumbPath}
@@ -32,7 +43,7 @@ const TopBar = ({ breadcrumbPath, onNavigateBreadcrumb, title }) => {
           title && (
             <h1 
               style={{ color: 'var(--color-text-primary)' }}
-              className="text-sm font-bold truncate tracking-tight"
+              className="text-sm font-bold truncate tracking-tight m-0"
             >
               {title}
             </h1>

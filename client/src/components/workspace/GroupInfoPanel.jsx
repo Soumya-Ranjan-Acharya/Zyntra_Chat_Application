@@ -153,10 +153,6 @@ const GroupInfoPanel = ({ node, onClose }) => {
           <p className="text-xs text-slate-500 mt-1 leading-relaxed">
             {node.description || 'Organizational communication channel'}
           </p>
-          <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200/60">
-            <ShieldCheck size={12} className="text-emerald-600" />
-            End-to-End Encrypted
-          </div>
         </div>
 
         {/* Hierarchy Context Breadcrumb */}

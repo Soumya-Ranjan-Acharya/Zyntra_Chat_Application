@@ -19,14 +19,14 @@ const PrivacySettings = () => {
             margin: '0 0 3px 0'
           }}
         >
-          Privacy & Encryption
+          Privacy & Security
         </h2>
-        <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }}>
-          Zyntra guarantees end-to-end encrypted messaging with zero server-side plaintext logging.
+        <p style={{ fontSize: '11px', color: 'var(--color-text-tertiary, #94a3b8)', margin: 0 }}>
+          Zyntra guarantees secure messaging with zero server-side plaintext logging.
         </p>
       </div>
 
-      {/* E2EE Certificate Card matching mockup */}
+      {/* Security Certificate Card matching mockup */}
       <div
         style={{
           maxWidth: '640px',
@@ -43,10 +43,10 @@ const PrivacySettings = () => {
         <ShieldCheck size={22} color="#16a34a" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div>
           <div style={{ fontSize: '13px', fontWeight: 800, color: '#14532d', marginBottom: '3px' }}>
-            End-to-End Encryption Protocol Active
+            Secure Messaging Protocol Active
           </div>
           <p style={{ fontSize: '11px', color: '#15803d', margin: '0 0 6px 0', lineHeight: 1.45 }}>
-            Your messages are encrypted on your device and can only be decrypted by the verified recipient. Keys are generated client-side.
+            Your messages are protected and only accessible to verified participants.
           </p>
           <div
             style={{

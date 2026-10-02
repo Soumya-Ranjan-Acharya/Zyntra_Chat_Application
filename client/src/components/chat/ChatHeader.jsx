@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Search, Info, ArrowLeft, Phone, Video, ShieldCheck, X } from 'lucide-react';
+import { Search, Info, ArrowLeft, Phone, Video, X } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 
 const ChatHeader = ({
@@ -8,7 +8,6 @@ const ChatHeader = ({
   avatar = null,
   status = null,
   memberCount,
-  isEncrypted = true,
   onInfoClick,
   onBackClick,
   policy = {}
@@ -17,7 +16,7 @@ const ChatHeader = ({
 
   return (
     <header
-      className="pl-[52px] lg:pl-5 pr-3 sm:pr-5 py-2.5"
+      className="px-2.5 sm:px-5 py-2 sm:py-2.5"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -30,20 +29,20 @@ const ChatHeader = ({
         flexShrink: 0,
         userSelect: 'none',
         zIndex: 10,
-        minHeight: '58px',
+        minHeight: '56px',
         position: 'relative',
       }}
     >
       {/* Left: Back + Avatar + Name */}
-      <div className="flex items-center gap-3 min-w-0" style={{ flex: 1 }}>
+      <div className="flex items-center gap-2.5 min-w-0" style={{ flex: 1 }}>
         {onBackClick && (
           <motion.button
             onClick={onBackClick}
             whileTap={{ scale: 0.9 }}
-            className="lg:hidden p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] transition-colors"
+            className="lg:hidden p-1.5 -ml-1 rounded-full text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)] hover:text-[var(--color-text-primary)] transition-colors shrink-0"
             title="Back"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} />
           </motion.button>
         )}
 
@@ -70,28 +69,6 @@ const ChatHeader = ({
             >
               {name}
             </h2>
-            {isEncrypted && (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  padding: '2px 7px',
-                  borderRadius: '999px',
-                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                  color: '#10b981',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  border: '1px solid rgba(16, 185, 129, 0.2)',
-                  flexShrink: 0,
-                }}
-                className="hidden sm:inline-flex"
-                title="Encrypted"
-              >
-                <ShieldCheck size={11} />
-                Encrypted
-              </span>
-            )}
           </div>
 
           <div

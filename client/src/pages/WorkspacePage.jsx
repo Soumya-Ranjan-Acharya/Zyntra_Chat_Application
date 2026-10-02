@@ -68,8 +68,17 @@ const WorkspacePage = () => {
     const channelParam = params.get('channel');
     if (channelParam && nodes[channelParam]) {
       setActiveNode(channelParam);
+    } else {
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+      if (isDesktop && !activeNodeId && activeWorkspace?.rootNodeId && nodes[activeWorkspace.rootNodeId]) {
+        const root = nodes[activeWorkspace.rootNodeId];
+        const firstChannel = root.children?.[0] || activeWorkspace.rootNodeId;
+        if (firstChannel) {
+          setActiveNode(firstChannel);
+        }
+      }
     }
-  }, [activeWorkspace, nodes, setActiveNode]);
+  }, [activeWorkspace, nodes, activeNodeId, setActiveNode]);
 
   // Whenever activeNodeId changes, sync with chat store
   useEffect(() => {
@@ -119,7 +128,10 @@ const WorkspacePage = () => {
   const breadcrumbPath = activeNodeId ? getNodePath(activeNodeId) : [];
 
   return (
-    <AppLayout sidebar={<Sidebar mode="workspace" />}>
+    <AppLayout
+      sidebar={<Sidebar mode="workspace" />}
+      isMobileChatOpen={Boolean(activeNodeId)}
+    >
       {allWorkspaces.length === 0 ? (
         /* Fresh User Onboarding Empty State for Workspaces */
         <div 
@@ -183,6 +195,10 @@ const WorkspacePage = () => {
             breadcrumbPath={breadcrumbPath}
             onNavigateBreadcrumb={(nodeId) => setActiveNode(nodeId)}
             title={currentNode?.name || activeWorkspace?.name}
+            onBackClick={() => {
+              setActiveNode(null);
+              setActiveChat(null);
+            }}
           />
 
           {/* Workspace Body: Chat Area + Optional Slide-out Info Drawer */}
@@ -195,10 +211,14 @@ const WorkspacePage = () => {
                 chatAvatar={currentNode?.avatar || null}
                 memberCount={currentNode?.memberCount}
                 policy={policy}
-                messages={messages[activeNodeId] || []}
+                messages={activeNodeId ? (messages[activeNodeId] || []) : []}
                 currentUserId={user?.id || user?._id || 'user-1'}
-                onSend={(text, attachment) => sendMessage(activeNodeId, text, attachment)}
+                onSend={(text, attachment) => activeNodeId && sendMessage(activeNodeId, text, attachment)}
                 onInfoClick={() => setShowInfo(!showInfo)}
+                onBackClick={() => {
+                  setActiveNode(null);
+                  setActiveChat(null);
+                }}
               />
             </div>
 

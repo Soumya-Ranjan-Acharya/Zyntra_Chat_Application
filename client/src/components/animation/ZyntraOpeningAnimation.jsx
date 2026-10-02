@@ -365,8 +365,8 @@ const ZyntraOpeningAnimation = ({
               }}
             >
               <img
-                src="/zyntra-unicorn-transparent.png"
-                alt="Zyntra Unicorn Logo"
+                src="/zyntra-logo.png"
+                alt="Zyntra Logo"
                 style={{
                   position: 'absolute',
                   inset: 0,
@@ -454,8 +454,8 @@ const ZyntraOpeningAnimation = ({
                     zIndex: 5,
                     overflow: 'hidden',
                     pointerEvents: 'none',
-                    maskImage: 'url(/zyntra-unicorn-transparent.png)',
-                    WebkitMaskImage: 'url(/zyntra-unicorn-transparent.png)',
+                    maskImage: 'url(/zyntra-logo.png)',
+                    WebkitMaskImage: 'url(/zyntra-logo.png)',
                     maskSize: 'contain',
                     WebkitMaskSize: 'contain',
                     maskRepeat: 'no-repeat',

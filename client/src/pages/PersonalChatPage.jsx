@@ -5,7 +5,7 @@ import Sidebar from '../components/layout/Sidebar';
 import ChatArea from '../components/chat/ChatArea';
 import useChatStore from '../store/useChatStore';
 import useAuthStore from '../store/useAuthStore';
-import { UserPlus, Users, MessageSquarePlus, ShieldCheck, Sparkles } from 'lucide-react';
+import { UserPlus, Users, MessageSquarePlus, Sparkles } from 'lucide-react';
 import { api } from '../services/api';
 import AddContactModal from '../components/contacts/AddContactModal';
 import CreateGroupModal from '../components/workspace/CreateGroupModal';
@@ -18,18 +18,27 @@ const PersonalChatPage = () => {
   const [addContactOpen, setAddContactOpen] = useState(false);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
 
-  // Sync activeChat with URL param, or fallback to first contact
+  // Sync activeChat with URL param, or fallback to first contact on desktop
   useEffect(() => {
     document.title = 'Zyntra — Personal Space';
-    if (chatId && chatId !== activeChat) {
-      setActiveChat(chatId);
-    } else if (!chatId && !activeChat && contacts.length > 0) {
-      // Default to first contact if no active chat
-      setActiveChat(contacts[0].id);
-      navigate(`/personal/${contacts[0].id}`, { replace: true });
-    } else if (activeChat && !chatId) {
-      // If we have an active chat but no URL param (e.g. just went to /personal), update URL
-      navigate(`/personal/${activeChat}`, { replace: true });
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+
+    if (chatId) {
+      if (chatId !== activeChat) {
+        setActiveChat(chatId);
+      }
+    } else {
+      // On mobile at /personal, show the chat list
+      if (!isDesktop) {
+        if (activeChat) setActiveChat(null);
+      } else if (contacts.length > 0) {
+        // On desktop, auto-select activeChat or first contact for dual-pane view
+        const target = (activeChat && contacts.some((c) => c.id === activeChat))
+          ? activeChat
+          : contacts[0].id;
+        setActiveChat(target);
+        navigate(`/personal/${target}`, { replace: true });
+      }
     }
   }, [chatId, activeChat, contacts, setActiveChat, navigate]);
 
@@ -38,7 +47,7 @@ const PersonalChatPage = () => {
     reactions: true,
     editMessage: true,
     deleteMessage: true,
-    title: 'Personal Direct Communication'
+    title: 'Direct Messages'
   };
 
   const getChatName = () => {
@@ -69,10 +78,14 @@ const PersonalChatPage = () => {
   };
 
   const hasConversations = contacts.length > 0 || groups.length > 0;
+  const isChatSelected = Boolean(chatId && activeChat);
 
   return (
-    <AppLayout sidebar={<Sidebar mode="personal" />}>
-      {hasConversations && activeChat ? (
+    <AppLayout
+      sidebar={<Sidebar mode="personal" />}
+      isMobileChatOpen={isChatSelected}
+    >
+      {hasConversations ? (
         <ChatArea
           chatId={activeChat}
           chatName={getChatName()}
@@ -80,9 +93,13 @@ const PersonalChatPage = () => {
           chatStatus={getChatStatus()}
           memberCount={getMemberCount()}
           policy={personalPolicy}
-          messages={messages[activeChat] || []}
+          messages={activeChat ? (messages[activeChat] || []) : []}
           currentUserId={user?.id || user?._id || 'user-1'}
-          onSend={(text, attachment) => sendMessage(activeChat, text, attachment)}
+          onSend={(text, attachment) => activeChat && sendMessage(activeChat, text, attachment)}
+          onBackClick={() => {
+            setActiveChat(null);
+            navigate('/personal');
+          }}
         />
       ) : (
         /* Fresh User Onboarding Empty State */
@@ -132,13 +149,6 @@ const PersonalChatPage = () => {
               + Create Group
             </button>
           </div>
-          <div 
-            style={{ color: 'var(--color-text-tertiary)' }}
-            className="mt-8 inline-flex items-center gap-2 text-[11px]"
-          >
-            <ShieldCheck size={14} className="text-emerald-500" />
-            End-to-End Encrypted Private Messages
-          </div>
         </div>
       )}
 
@@ -182,4 +192,3 @@ const PersonalChatPage = () => {
 };
 
 export default PersonalChatPage;
-

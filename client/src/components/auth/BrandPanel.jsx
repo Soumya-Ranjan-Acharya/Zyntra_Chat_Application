@@ -5,7 +5,7 @@ import { ShieldCheck, Zap, Users } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 
 const features = [
-  { icon: ShieldCheck, label: 'End-to-End Encrypted', color: '#10b981' },
+  { icon: ShieldCheck, label: 'Private & Secure',      color: '#10b981' },
   { icon: Zap,         label: 'Real-time messaging',  color: '#f59e0b' },
   { icon: Users,       label: 'Multi-workspace',       color: '#8b5cf6' },
 ];
@@ -63,11 +63,10 @@ const BrandPanel = ({ previewUsername, previewName }) => {
           transition={{ duration: 0.5, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
         >
           <h2 style={{ fontSize: '26px', fontWeight: 800, lineHeight: 1.2, color: '#ffffff', letterSpacing: '-0.025em', margin: '0 0 10px' }}>
-            Communication that<br />
-            <span style={{ color: 'rgba(147,197,253,0.9)' }}>follows where you belong.</span>
+            Next-Gen Messaging
           </h2>
           <p style={{ fontSize: '13px', color: 'rgba(148,163,184,0.9)', lineHeight: 1.65, margin: '0 0 32px' }}>
-            Sign in once and continue securely in the context that matters — personal or workplace.
+            Sign in to continue in your personal or workplace space.
           </p>
         </motion.div>
 

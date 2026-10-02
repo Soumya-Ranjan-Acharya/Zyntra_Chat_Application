@@ -245,9 +245,6 @@ const HomePage = () => {
             <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
               Zyntra
             </span>
-            <span className="hidden md:inline text-xs text-[var(--color-text-secondary)] ml-2 font-medium">
-              Identity & Workspace
-            </span>
           </div>
         </motion.div>
 

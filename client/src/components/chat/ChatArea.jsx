@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquareDashed, Lock } from 'lucide-react';
+import { MessageSquareDashed } from 'lucide-react';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';
 import Composer from './Composer';
@@ -49,22 +49,10 @@ const ChatArea = ({
           No conversation selected
         </h3>
         <p
-          style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', maxWidth: '300px', lineHeight: 1.6, marginBottom: '20px' }}
+          style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', maxWidth: '300px', lineHeight: 1.6 }}
         >
           Pick a contact or channel from the sidebar to start messaging.
         </p>
-        <div
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            padding: '6px 14px', borderRadius: '999px',
-            backgroundColor: 'rgba(16, 185, 129, 0.08)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
-            fontSize: '12px', fontWeight: 500, color: '#10b981',
-          }}
-        >
-          <Lock size={12} />
-          End-to-End Encrypted
-        </div>
       </div>
     );
   }
