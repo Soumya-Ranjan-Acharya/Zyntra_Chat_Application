@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Settings, LogOut, Home } from 'lucide-react';
@@ -8,11 +8,27 @@ import useAuthStore from '../../store/useAuthStore';
 const AppLayout = ({ children, sidebar, isMobileChatOpen = false }) => {
   const { user, logout, activeContext } = useAuthStore();
   const navigate = useNavigate();
+  
+  // Client-side detection to bypass CSS media query cascade bugs
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  const showSidebar = !isMobile || !isMobileChatOpen;
+  const showMain = !isMobile || isMobileChatOpen;
 
   return (
     <div
@@ -26,10 +42,15 @@ const AppLayout = ({ children, sidebar, isMobileChatOpen = false }) => {
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
       }}
     >
-      {/* Left Sidebar: 320px on desktop, full-width on mobile */}
+      {/* Left Sidebar */}
       <aside
-        className={`app-sidebar ${isMobileChatOpen ? 'mobile-hidden' : 'mobile-visible'}`}
         style={{
+          width: isMobile ? '100%' : '320px',
+          minWidth: isMobile ? '100%' : '320px',
+          maxWidth: isMobile ? '100%' : '320px',
+          flexShrink: 0,
+          display: showSidebar ? 'flex' : 'none',
+          flexDirection: 'column',
           backgroundColor: 'var(--sidebar-bg)',
           color: 'var(--sidebar-text)',
           borderRight: '1px solid var(--sidebar-border)',
@@ -82,12 +103,17 @@ const AppLayout = ({ children, sidebar, isMobileChatOpen = false }) => {
         </div>
       </aside>
 
-      {/* Main content: flex-1 on desktop, full-width on mobile */}
+      {/* Main content */}
       <main
-        className={`app-main ${isMobileChatOpen ? 'mobile-visible' : 'mobile-hidden'}`}
         style={{
+          flex: 1,
+          minWidth: 0,
+          display: showMain ? 'flex' : 'none',
+          flexDirection: 'column',
           backgroundColor: 'var(--color-bg-primary)',
           position: 'relative',
+          overflow: 'hidden',
+          width: isMobile ? '100%' : 'auto',
         }}
       >
         {children}
