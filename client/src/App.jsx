@@ -51,7 +51,7 @@ export default function App() {
 
   return (
     <AnimatePresence mode="wait">
-      <Routes>
+      <Routes location={location} key={location.pathname}>
         {/* ---- Auth Routes (guest-only) ---- */}
         <Route
           path="/login"

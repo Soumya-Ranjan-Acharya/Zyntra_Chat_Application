@@ -13,7 +13,7 @@ import CreateGroupModal from '../components/workspace/CreateGroupModal';
 const PersonalChatPage = () => {
   const { chatId } = useParams();
   const navigate = useNavigate();
-  const { activeChat, setActiveChat, messages, sendMessage, contacts = [], groups = [], addGroup } = useChatStore();
+  const { activeChat, setActiveChat, messages, sendMessage, contacts = [], groups = [], addGroup, isLoadingContacts } = useChatStore();
   const user = useAuthStore((s) => s.user);
   const [addContactOpen, setAddContactOpen] = useState(false);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
@@ -77,7 +77,7 @@ const PersonalChatPage = () => {
     return group?.membersCount;
   };
 
-  const hasConversations = contacts.length > 0 || groups.length > 0;
+  const hasConversations = isLoadingContacts || contacts.length > 0 || groups.length > 0;
   const isChatSelected = Boolean(chatId && activeChat);
 
   return (

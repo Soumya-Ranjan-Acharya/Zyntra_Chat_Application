@@ -25,7 +25,8 @@ const WorkspacePage = () => {
     setActiveNode,
     getNodePath,
     createWorkspace,
-    joinGroupByCode
+    joinGroupByCode,
+    isLoadingWorkspaces
   } = useWorkspaceStore();
 
   const { messages, setActiveChat, sendMessage } = useChatStore();
@@ -38,6 +39,7 @@ const WorkspacePage = () => {
 
   const isDemo = user?.primaryUsername === 'soumya' || user?.email === 'soumya@zyntra.com';
   const allWorkspaces = storeWorkspaces?.length > 0 ? storeWorkspaces : (isDemo ? demoWorkspaces : []);
+  const hasWorkspaces = isLoadingWorkspaces || allWorkspaces.length > 0;
 
   // Sync workspace from URL param
   useEffect(() => {
@@ -132,7 +134,7 @@ const WorkspacePage = () => {
       sidebar={<Sidebar mode="workspace" />}
       isMobileChatOpen={Boolean(activeNodeId)}
     >
-      {allWorkspaces.length === 0 ? (
+      {!hasWorkspaces ? (
         /* Fresh User Onboarding Empty State for Workspaces */
         <div 
           className="flex-1 flex flex-col items-center justify-center p-8 text-center select-none h-full"
