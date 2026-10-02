@@ -23,13 +23,25 @@ const BrandPanel = ({ previewUsername, previewName }) => {
 
   return (
     <div
-      className="hidden lg:flex flex-col justify-between p-11 relative overflow-hidden select-none min-w-[340px] flex-[0_0_45%]"
       style={{
         color: '#ffffff',
         background: 'linear-gradient(-45deg, #080c1e, #0d1530, #08122a, #050a1a)',
         backgroundSize: '400% 400%',
         animation: 'gradientShift 16s ease infinite',
+        display: 'none',        // hidden on mobile by default
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '44px',
+        position: 'relative',
+        overflow: 'hidden',
+        userSelect: 'none',
+        width: '420px',
+        minWidth: '380px',
+        maxWidth: '45%',
+        flexShrink: 0,
       }}
+      // Show on desktop (>= 768px) via media query fallback with a class
+      className="auth-brand-panel"
     >
       {/* Ambient glow orbs */}
       <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />

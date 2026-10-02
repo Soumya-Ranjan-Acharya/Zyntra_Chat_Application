@@ -183,19 +183,35 @@ const MessageList = ({ messages = [], currentUserId, policy = {}, chatId, onRepl
   const renderList = buildRenderList(messages, isOwnFn);
 
   return (
-    <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+    /*
+     * Outer wrapper: flex:1 + min-height:0 so it fills the space between
+     * ChatHeader and Composer WITHOUT overflowing.
+     * position:relative is for the scroll-to-bottom button.
+     */
+    <div
+      style={{
+        flex: 1,
+        minHeight: 0,
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Scroll container — takes all available height */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
         style={{
           flex: 1,
+          minHeight: 0,
           overflowY: 'auto',
+          overflowX: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          boxSizing: 'border-box',
-          height: '100%',
+          padding: '8px 16px 16px',
         }}
-        className="custom-scrollbar px-3 sm:px-6 pt-2 pb-4 touch-scroll"
+        className="custom-scrollbar"
       >
         {renderList.map((item) => {
           if (item.type === 'date') {
@@ -218,10 +234,10 @@ const MessageList = ({ messages = [], currentUserId, policy = {}, chatId, onRepl
             </div>
           );
         })}
-        <div ref={bottomRef} style={{ height: '4px' }} />
+        <div ref={bottomRef} style={{ height: '1px', flexShrink: 0 }} />
       </div>
 
-      {/* Scroll to bottom button */}
+      {/* Scroll to bottom FAB */}
       <AnimatePresence>
         {showScrollBtn && (
           <motion.button
@@ -232,8 +248,8 @@ const MessageList = ({ messages = [], currentUserId, policy = {}, chatId, onRepl
             onClick={scrollToBottom}
             style={{
               position: 'absolute',
-              bottom: '16px',
-              right: '24px',
+              bottom: '12px',
+              right: '20px',
               width: '36px',
               height: '36px',
               borderRadius: '50%',

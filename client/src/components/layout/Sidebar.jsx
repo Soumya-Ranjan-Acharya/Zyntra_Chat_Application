@@ -231,7 +231,19 @@ const Sidebar = ({ mode = 'personal', onCloseMobile }) => {
   };
 
   return (
-    <div className="flex flex-col h-full select-none bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] border-r border-[var(--sidebar-border)] relative">
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        width: '100%',
+        overflow: 'hidden',
+        userSelect: 'none',
+        backgroundColor: 'var(--sidebar-bg)',
+        color: 'var(--sidebar-text)',
+        position: 'relative',
+      }}
+    >
       {/* Top Context Switcher Header */}
       <div className="p-3 border-b border-[var(--sidebar-border)] bg-[var(--color-bg-primary)] relative z-50">
         <button
@@ -339,7 +351,16 @@ const Sidebar = ({ mode = 'personal', onCloseMobile }) => {
       </div>
 
       {/* ================= MAIN CONTENT AREA ================= */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-1.5">
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          padding: '6px 12px',
+        }}
+        className="custom-scrollbar"
+      >
         {mode === 'workspace' ? (
           workspaces.length === 0 ? (
             <div className="py-9 px-3 text-center">

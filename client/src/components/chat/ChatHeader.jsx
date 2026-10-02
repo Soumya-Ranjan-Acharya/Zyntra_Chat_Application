@@ -16,21 +16,22 @@ const ChatHeader = ({
 
   return (
     <header
-      className="px-2.5 sm:px-5 py-2 sm:py-2.5"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        padding: '0 12px',
+        height: '56px',
+        minHeight: '56px',
+        flexShrink: 0,              // CRITICAL: header must never compress
         borderBottom: '1px solid var(--color-border-primary)',
         backgroundColor: 'var(--color-bg-primary)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        boxShadow: '0 1px 0 rgba(0,0,0,0.04)',
-        flexShrink: 0,
         userSelect: 'none',
         zIndex: 10,
-        minHeight: '56px',
         position: 'relative',
+        gap: '8px',
       }}
     >
       {/* Left: Back + Avatar + Name */}

@@ -11,54 +11,64 @@ const RegisterPage = () => {
     <div
       style={{
         minHeight: '100vh',
-        backgroundColor: 'var(--color-bg-secondary, #e2e5ea)',
+        width: '100%',
+        backgroundColor: 'var(--color-bg-secondary)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
+        padding: '16px',
         boxSizing: 'border-box',
-        fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
+        fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
       }}
-      className="p-3 sm:p-6"
     >
-      <div style={{ width: '100%', maxWidth: '1040px' }}>
-        {/* Top Header */}
+      <div style={{ width: '100%', maxWidth: '1000px' }}>
+        {/* Breadcrumb label */}
         <div
           style={{
-            marginBottom: '10px',
+            marginBottom: '8px',
             paddingLeft: '4px',
             fontSize: '12px',
             fontWeight: 600,
-            color: 'var(--color-text-tertiary, #64748b)',
-            userSelect: 'none'
+            color: 'var(--color-text-tertiary)',
+            userSelect: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
-          className="flex items-center gap-2"
         >
-          <img src="/zyntra-logo.png" alt="Zyntra" className="w-4 h-4 object-contain lg:hidden" />
+          <img src="/zyntra-logo.png" alt="Zyntra" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
           <span>Zyntra — Registration</span>
         </div>
 
-        {/* Master Floating Window Card */}
+        {/* Card */}
         <div
           style={{
             width: '100%',
-            backgroundColor: 'var(--color-bg-primary, #ffffff)',
-            borderRadius: '24px',
-            boxShadow: 'var(--elevation-3, 0 20px 40px -15px rgba(0, 0, 0, 0.15))',
+            backgroundColor: 'var(--color-bg-primary)',
+            borderRadius: '20px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
             overflow: 'hidden',
-            border: '1px solid var(--color-border-primary, #d1d5db)',
+            border: '1px solid var(--color-border-primary)',
+            display: 'flex',
+            flexDirection: 'row',
+            minHeight: '520px',
           }}
-          className="flex flex-col lg:flex-row min-h-0 sm:min-h-[560px]"
         >
-          {/* Left Brand Panel (Desktop) */}
+          {/* Left Brand Panel — hidden on mobile */}
           <BrandPanel />
 
           {/* Right Form Panel */}
           <div
             style={{
-              backgroundColor: 'var(--color-bg-primary, #ffffff)',
+              flex: 1,
+              minWidth: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '32px 24px',
+              backgroundColor: 'var(--color-bg-primary)',
             }}
-            className="flex-1 p-5 sm:p-10 flex items-center justify-center"
           >
             <RegisterForm />
           </div>

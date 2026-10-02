@@ -28,9 +28,9 @@ const SettingsLayout = ({ children }) => {
         flexDirection: 'column',
         alignItems: 'center',
         boxSizing: 'border-box',
-        fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
+        fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+        padding: '16px',
       }}
-      className="p-2 sm:p-5"
     >
       {/* Outer Card Container */}
       <div
@@ -42,9 +42,9 @@ const SettingsLayout = ({ children }) => {
           boxShadow: 'var(--elevation-3)',
           border: '1px solid var(--color-border-primary)',
           boxSizing: 'border-box',
-          margin: '0 auto'
+          margin: '0 auto',
+          padding: '24px',
         }}
-        className="p-3.5 sm:p-7"
       >
         {/* Top Header Bar matching media_1789559080552.png */}
         <div
@@ -181,9 +181,9 @@ const SettingsLayout = ({ children }) => {
           style={{
             border: '2px solid var(--color-accent)',
             borderRadius: '14px',
-            backgroundColor: 'var(--color-bg-primary)'
+            backgroundColor: 'var(--color-bg-primary)',
+            padding: '24px',
           }}
-          className="p-3.5 sm:p-6 md:p-8"
         >
           {children}
         </div>
